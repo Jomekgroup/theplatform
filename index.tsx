@@ -7,10 +7,9 @@ import {
   LayoutGrid, PenTool, Image as ImageIcon, Sun, Moon,
   CreditCard, Trash2, Lock, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube
 } from 'lucide-react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // --- Configuration ---
-// ✅ LIVE BACKEND URL (Points to your Render server)
+// ✅ LIVE BACKEND URL
 const API_URL = "https://platform-backend-54nn.onrender.com/api"; 
 
 // --- Types ---
@@ -417,8 +416,6 @@ const SubmitNewsPage: React.FC<{
   const [content, setContent] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<{title?: string; summary?: string} | null>(null);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -433,44 +430,16 @@ const SubmitNewsPage: React.FC<{
     }
   };
 
-  const handleAnalyze = async () => {
-    if (!content) return;
-    setIsAnalyzing(true);
-    try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY; // USE VITE ENV
-      if (!apiKey) {
-        alert("Gemini API Key missing in .env!");
-        return;
-      }
-      const ai = new GoogleGenerativeAI(apiKey);
-      const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-      
-      const prompt = `Analyze this news article content and provide a catchy headline and a one-sentence summary. 
-      Format as JSON: {"title": "...", "summary": "..."}
-      Content: ${content.substring(0, 1000)}`;
-      
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
-      const json = JSON.parse(text.replace(/```json|```/g, ''));
-      setAiSuggestions(json);
-    } catch (error) {
-      console.error("AI Analysis failed", error);
-      alert("AI Analysis failed. Check console.");
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // We send data to backend, backend will assign ID and Date
     const articleData: any = {
-      title: aiSuggestions?.title || title,
+      title,
       category,
       author: 'Citizen Reporter',
       image: imagePreview || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=1000',
-      excerpt: aiSuggestions?.summary || content.substring(0, 100) + '...',
+      excerpt: content.substring(0, 100) + '...',
       content,
     };
 
@@ -503,10 +472,12 @@ const SubmitNewsPage: React.FC<{
               className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent dark:text-white"
             >
               <option>Politics</option>
+              <option>Metro</option>
               <option>Business</option>
               <option>Technology</option>
               <option>Sports</option>
               <option>Entertainment</option>
+              <option>Education</option>
               <option>Editorials</option>
             </select>
           </div>
@@ -540,30 +511,7 @@ const SubmitNewsPage: React.FC<{
               placeholder="Write your story here..."
               required
             />
-            <button
-              type="button"
-              onClick={handleAnalyze}
-              disabled={!content || isAnalyzing}
-              className="mt-2 text-sm text-naija flex items-center gap-1 hover:underline disabled:opacity-50"
-            >
-              {isAnalyzing ? 'Analyzing...' : '✨ AI Proofread & Suggest Headline'}
-            </button>
           </div>
-
-          {aiSuggestions && (
-            <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg border border-green-100 dark:border-green-800">
-              <p className="text-xs font-bold text-naija uppercase mb-2">AI Suggestion</p>
-              <p className="font-bold text-gray-900 dark:text-white mb-1">{aiSuggestions.title}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{aiSuggestions.summary}</p>
-              <button 
-                type="button"
-                onClick={() => setTitle(aiSuggestions.title || '')}
-                className="mt-2 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 px-2 py-1 rounded hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                Use this title
-              </button>
-            </div>
-          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Headline</label>
@@ -1060,9 +1008,13 @@ const Footer: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }
           <h3 className="font-bold mb-6 text-lg text-gray-900 dark:text-white">News Sections</h3>
           <ul className="space-y-3 text-gray-600 dark:text-gray-400 text-sm">
             <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Politics</li>
+            {/* ✅ NEW CATEGORY: METRO */}
+            <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Metro</li>
             <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Business</li>
             <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Technology</li>
             <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Sports</li>
+            {/* ✅ NEW CATEGORY: EDUCATION */}
+            <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Education</li>
             <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Editorials</li>
           </ul>
         </div>
@@ -1124,8 +1076,6 @@ const Footer: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }
 const App: React.FC = () => {
   const [view, setView] = useState('home');
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  
-  // REAL DATA STATES
   const [articles, setArticles] = useState<Article[]>([]);
   const [pendingArticles, setPendingArticles] = useState<Article[]>([]);
   const [ads, setAds] = useState<Advertisement[]>([]);
@@ -1278,8 +1228,10 @@ const App: React.FC = () => {
   // Mix sponsored articles into feed
   const displayFeed = [...filteredArticles];
   sponsoredAds.forEach((ad, index) => {
+    // Insert sponsored content every 3 items if possible
     const insertIndex = (index + 1) * 3;
     if (insertIndex < displayFeed.length) {
+       // Create a pseudo-article from the ad
        const adArticle: any = { isAd: true, data: ad, id: `ad-${ad.id}` };
        displayFeed.splice(insertIndex, 0, adArticle);
     }
@@ -1319,7 +1271,7 @@ const App: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Category Nav */}
             <div className="flex overflow-x-auto pb-4 mb-6 gap-2 scrollbar-hide">
-               {['All', 'Politics', 'Business', 'Technology', 'Sports', 'Entertainment', 'Editorials'].map(cat => (
+               {['All', 'Politics', 'Metro', 'Business', 'Technology', 'Sports', 'Entertainment', 'Education', 'Editorials'].map(cat => (
                  <button 
                    key={cat}
                    onClick={() => setSelectedCategory(cat)}
@@ -1421,6 +1373,9 @@ const App: React.FC = () => {
           <ArticleReader 
             article={selectedArticle} 
             onBack={() => setView('home')}
+            comments={comments[selectedArticle.id] || []}
+            onAddComment={handleAddComment}
+            onDeleteComment={handleDeleteComment}
             isAdmin={isAdmin}
           />
         )}
