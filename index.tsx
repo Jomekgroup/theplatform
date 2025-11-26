@@ -26,6 +26,7 @@ interface Comment {
 interface Article {
   id: string;
   title: string;
+  subHeadline?: string; // NEW
   category: string;
   author: string;
   date: string;
@@ -40,6 +41,7 @@ interface Article {
 // Helper to match Database columns (snake_case) to Frontend (camelCase)
 const mapArticleFromDB = (dbArticle: any): Article => ({
   ...dbArticle,
+  subHeadline: dbArticle.sub_headline, // Map new column
   isBreaking: dbArticle.is_breaking, 
   date: new Date(dbArticle.date).toLocaleDateString() 
 });
@@ -226,12 +228,10 @@ const ArticleReader: React.FC<{
     const [commentEmail, setCommentEmail] = useState('');
     const [commentContent, setCommentContent] = useState('');
   
-    // Get Related Articles (Same category, excluding current)
     const relatedArticles = allArticles
       .filter(a => a.category === article.category && a.id !== article.id)
       .slice(0, 3);
   
-    // Scroll to top when article changes
     useEffect(() => {
       window.scrollTo(0, 0);
     }, [article.id]);
@@ -295,6 +295,10 @@ const ArticleReader: React.FC<{
               <h1 className="text-3xl md:text-4xl font-serif font-bold text-white leading-tight">
                 {article.title}
               </h1>
+              {/* SUB-HEADLINE DISPLAY */}
+              {article.subHeadline && (
+                <p className="text-gray-200 text-xl font-medium mt-2">{article.subHeadline}</p>
+              )}
             </div>
           </div>
   
@@ -468,7 +472,7 @@ const SubmitNewsPage: React.FC<{
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // We send data to backend, backend will assign ID and Date
+    // PUBLIC SUBMISSION: NO STATUS SENT (Defaults to pending)
     const articleData: any = {
       title,
       category,
@@ -572,6 +576,7 @@ const SubmitNewsPage: React.FC<{
   );
 };
 
+// ... AdvertisePage, StaffLoginPage ... (Keep exactly as before)
 const AdvertisePage: React.FC<{ 
   onBack: () => void;
   onSubmitAd: (ad: Advertisement) => void;
@@ -812,9 +817,12 @@ const AdminDashboard: React.FC<{
   const [activeTab, setActiveTab] = useState<'live' | 'pending' | 'compose' | 'ads'>('live');
   
   // Compose/Edit State
-  const [editingId, setEditingId] = useState<string | null>(null); // Track if editing
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState('');
+  const [subHeadline, setSubHeadline] = useState(''); // NEW
   const [category, setCategory] = useState('Politics');
+  const [authorName, setAuthorName] = useState('Staff Reporter'); // NEW
+  const [showAuthor, setShowAuthor] = useState(true); // NEW: Toggle
   const [content, setContent] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
@@ -833,18 +841,18 @@ const AdminDashboard: React.FC<{
     }
   };
 
-  // Populate form for editing
   const handleEditClick = (article: Article) => {
     setEditingId(article.id);
     setTitle(article.title);
+    setSubHeadline(article.subHeadline || '');
     setCategory(article.category);
     setContent(article.content);
+    setAuthorName(article.author);
     setImagePreview(article.image);
     setIsBreaking(article.isBreaking || false);
     setActiveTab('compose');
   };
 
-  // Safe Delete
   const handleSafeDelete = (id: string) => {
     if (window.confirm("Do you really want to delete this news item? This action cannot be undone.")) {
       onDelete(id);
@@ -853,14 +861,20 @@ const AdminDashboard: React.FC<{
 
   const handlePublishOrUpdate = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Determine author logic
+    const finalAuthor = showAuthor ? authorName : "The People's Platform";
+
     const article: any = {
       title,
+      subHeadline,
       category,
-      author: 'Staff Reporter',
+      author: finalAuthor,
       image: imagePreview || 'https://via.placeholder.com/800x400',
       excerpt: content.substring(0, 100) + '...',
       content,
-      isBreaking
+      isBreaking,
+      status: 'published' // FORCE STATUS TO PUBLISHED
     };
 
     if (editingId) {
@@ -869,11 +883,12 @@ const AdminDashboard: React.FC<{
       setEditingId(null);
     } else {
       onPublish(article);
-      alert('Article Published!');
+      alert('Article Published Live!');
     }
     
     // Reset Form
     setTitle('');
+    setSubHeadline('');
     setContent('');
     setImagePreview('');
     setIsBreaking(false);
@@ -914,6 +929,7 @@ const AdminDashboard: React.FC<{
                 setActiveTab('compose');
                 setEditingId(null);
                 setTitle('');
+                setSubHeadline('');
                 setContent('');
                 setImagePreview('');
             }} 
@@ -1018,12 +1034,21 @@ const AdminDashboard: React.FC<{
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
             <h3 className="text-xl font-bold mb-4 dark:text-white">{editingId ? 'Edit Article' : 'Compose New Article'}</h3>
             <form onSubmit={handlePublishOrUpdate} className="space-y-4">
-              <div className="flex gap-4">
-                  <div className="flex-1">
-                    <label className="block text-sm font-bold mb-1 dark:text-white">Headline</label>
+              {/* HEADLINE & SUB-HEADLINE */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold mb-1 dark:text-white">Main Headline</label>
                     <input value={title} onChange={e => setTitle(e.target.value)} className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white" required />
                   </div>
-                  <div className="w-1/3">
+                  <div>
+                    <label className="block text-sm font-bold mb-1 dark:text-white">Sub-Headline</label>
+                    <input value={subHeadline} onChange={e => setSubHeadline(e.target.value)} className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white" placeholder="Optional" />
+                  </div>
+              </div>
+
+              {/* CATEGORY & AUTHOR */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
                     <label className="block text-sm font-bold mb-1 dark:text-white">Category</label>
                     <select value={category} onChange={e => setCategory(e.target.value)} className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white">
                       <option>Politics</option>
@@ -1035,6 +1060,27 @@ const AdminDashboard: React.FC<{
                       <option>Education</option>
                       <option>Editorials</option>
                     </select>
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                        <label className="text-sm font-bold dark:text-white">Author Name</label>
+                        <div className="flex items-center gap-2">
+                            <input 
+                                type="checkbox" 
+                                id="showAuthor" 
+                                checked={showAuthor} 
+                                onChange={e => setShowAuthor(e.target.checked)} 
+                                className="w-4 h-4"
+                            />
+                            <label htmlFor="showAuthor" className="text-xs text-gray-500">Show on Article</label>
+                        </div>
+                    </div>
+                    <input 
+                        value={authorName} 
+                        onChange={e => setAuthorName(e.target.value)} 
+                        className={`w-full p-2 border rounded dark:bg-gray-700 dark:text-white ${!showAuthor ? 'opacity-50' : ''}`} 
+                        disabled={!showAuthor}
+                    />
                   </div>
               </div>
               
@@ -1290,6 +1336,8 @@ const App: React.FC = () => {
   };
 
   const handlePublish = async (articleData: Article) => {
+    // When Admin publishes, we send to the standard endpoint but with status='published'
+    // This is handled inside AdminDashboard now, but we use the same API logic here
     await handleSubmitNews(articleData); 
   };
 
