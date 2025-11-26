@@ -201,7 +201,7 @@ const SponsoredArticleCard: React.FC<{ ad: Advertisement }> = ({ ad }) => (
         {ad.adContent || "Check out this special feature from our partners."}
       </p>
       {ad.adUrl && (
-         <a 
+          <a 
           href={ad.adUrl} 
           target="_blank" 
           rel="noreferrer"
@@ -215,197 +215,232 @@ const SponsoredArticleCard: React.FC<{ ad: Advertisement }> = ({ ad }) => (
 );
 
 const ArticleReader: React.FC<{ 
-  article: Article; 
-  onBack: () => void;
-  isAdmin: boolean;
-}> = ({ article, onBack, isAdmin }) => {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [commentName, setCommentName] = useState('');
-  const [commentEmail, setCommentEmail] = useState('');
-  const [commentContent, setCommentContent] = useState('');
-
-  // Fetch comments when article opens
-  useEffect(() => {
-    fetch(`${API_URL}/articles/${article.id}/comments`)
-      .then(res => res.json())
-      .then(data => setComments(data))
-      .catch(err => console.error("Error fetching comments:", err));
-  }, [article.id]);
-
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!commentName.trim() || !commentContent.trim() || !commentEmail.trim()) return;
-
-    try {
-        const res = await fetch(`${API_URL}/comments`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                articleId: article.id,
-                author: commentName,
-                email: commentEmail,
-                content: commentContent
-            })
-        });
-
-        if (res.ok) {
-            const newComment = await res.json();
-            setComments([newComment, ...comments]);
-            setCommentName('');
-            setCommentEmail('');
-            setCommentContent('');
-        }
-    } catch (err) {
-        console.error("Error posting comment", err);
-        alert("Failed to post comment");
-    }
-  };
-
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <button 
-        onClick={onBack}
-        className="flex items-center gap-2 text-gray-500 hover:text-naija mb-6 transition-colors"
-      >
-        <ChevronRight className="w-4 h-4 rotate-180" /> Back to News
-      </button>
-
-      <article className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
-        <div className="h-64 md:h-96 w-full relative">
-          <img 
-            src={article.image || 'https://via.placeholder.com/800'} 
-            alt={article.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-8">
-            <span className="bg-naija text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4 inline-block">
-              {article.category}
-            </span>
-            <h1 className="text-3xl md:text-4xl font-serif font-bold text-white leading-tight">
-              {article.title}
-            </h1>
+    article: Article; 
+    allArticles: Article[]; 
+    onBack: () => void;
+    onNavigateToArticle: (article: Article) => void;
+    isAdmin: boolean;
+  }> = ({ article, allArticles, onBack, onNavigateToArticle, isAdmin }) => {
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [commentName, setCommentName] = useState('');
+    const [commentEmail, setCommentEmail] = useState('');
+    const [commentContent, setCommentContent] = useState('');
+  
+    // Get Related Articles (Same category, excluding current)
+    const relatedArticles = allArticles
+      .filter(a => a.category === article.category && a.id !== article.id)
+      .slice(0, 3);
+  
+    // Scroll to top when article changes
+    useEffect(() => {
+      window.scrollTo(0, 0);
+    }, [article.id]);
+  
+    useEffect(() => {
+      fetch(`${API_URL}/articles/${article.id}/comments`)
+        .then(res => res.json())
+        .then(data => setComments(data))
+        .catch(err => console.error("Error fetching comments:", err));
+    }, [article.id]);
+  
+    const handleSubmitComment = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!commentName.trim() || !commentContent.trim() || !commentEmail.trim()) return;
+  
+      try {
+          const res = await fetch(`${API_URL}/comments`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  articleId: article.id,
+                  author: commentName,
+                  email: commentEmail,
+                  content: commentContent
+              })
+          });
+  
+          if (res.ok) {
+              const newComment = await res.json();
+              setComments([newComment, ...comments]);
+              setCommentName('');
+              setCommentEmail('');
+              setCommentContent('');
+          }
+      } catch (err) {
+          console.error("Error posting comment", err);
+          alert("Failed to post comment");
+      }
+    };
+  
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-gray-500 hover:text-naija mb-6 transition-colors"
+        >
+          <ChevronRight className="w-4 h-4 rotate-180" /> Back to News
+        </button>
+  
+        <article className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden mb-8">
+          <div className="h-64 md:h-96 w-full relative">
+            <img 
+              src={article.image || 'https://via.placeholder.com/800'} 
+              alt={article.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-8">
+              <span className="bg-naija text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4 inline-block">
+                {article.category}
+              </span>
+              <h1 className="text-3xl md:text-4xl font-serif font-bold text-white leading-tight">
+                {article.title}
+              </h1>
+            </div>
           </div>
-        </div>
-
-        <div className="p-8">
-          <div className="flex items-center justify-between py-6 border-b border-gray-100 dark:border-gray-700 mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-gray-400" />
+  
+          <div className="p-8">
+            <div className="flex items-center justify-between py-6 border-b border-gray-100 dark:border-gray-700 mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                  <User className="w-6 h-6 text-gray-400" />
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900 dark:text-white">{article.author}</p>
+                  <p className="text-sm text-gray-500">{article.date}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-bold text-gray-900 dark:text-white">{article.author}</p>
-                <p className="text-sm text-gray-500">{article.date}</p>
+              <div className="flex gap-2">
+                <button className="p-2 text-gray-400 hover:text-naija transition-colors">
+                  <Share2 className="w-5 h-5" />
+                </button>
+                <button className="p-2 text-gray-400 hover:text-naija transition-colors">
+                  <Bookmark className="w-5 h-5" />
+                </button>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button className="p-2 text-gray-400 hover:text-naija transition-colors">
-                <Share2 className="w-5 h-5" />
-              </button>
-              <button className="p-2 text-gray-400 hover:text-naija transition-colors">
-                <Bookmark className="w-5 h-5" />
-              </button>
+  
+            <div className="prose dark:prose-invert max-w-none">
+              <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6 font-medium">
+                {article.excerpt}
+              </p>
+              <div className="text-gray-800 dark:text-gray-200 leading-loose space-y-4">
+                {article.content.split('\n').map((paragraph, idx) => (
+                  <p key={idx}>{paragraph}</p>
+                ))}
+              </div>
             </div>
           </div>
-
-          <div className="prose dark:prose-invert max-w-none">
-            <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6 font-medium">
-              {article.excerpt}
-            </p>
-            <div className="text-gray-800 dark:text-gray-200 leading-loose space-y-4">
-              {article.content.split('\n').map((paragraph, idx) => (
-                <p key={idx}>{paragraph}</p>
-              ))}
+  
+          {/* RELATED ARTICLES SECTION */}
+          {relatedArticles.length > 0 && (
+              <div className="p-8 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">You might also like</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {relatedArticles.map(rel => (
+                          <div 
+                              key={rel.id} 
+                              onClick={() => onNavigateToArticle(rel)}
+                              className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md cursor-pointer transition-all"
+                          >
+                              <div className="h-32 overflow-hidden">
+                                  <img src={rel.image} alt={rel.title} className="w-full h-full object-cover" />
+                              </div>
+                              <div className="p-4">
+                                  <span className="text-xs text-naija font-bold uppercase">{rel.category}</span>
+                                  <h4 className="font-bold text-sm text-gray-900 dark:text-white mt-1 line-clamp-2">{rel.title}</h4>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+          )}
+  
+          {/* Advertisement Placeholder */}
+          <div className="bg-white dark:bg-gray-800 p-8 text-center border-t border-gray-100 dark:border-gray-700">
+            <p className="text-sm text-gray-400 uppercase tracking-widest mb-2">Advertisement</p>
+            <div className="h-32 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
+              <span className="text-gray-400 font-medium">Place your ad here</span>
             </div>
           </div>
-        </div>
-
-        {/* Advertisement Placeholder */}
-        <div className="bg-gray-50 dark:bg-gray-900 p-8 border-t border-gray-100 dark:border-gray-700 text-center">
-          <p className="text-sm text-gray-400 uppercase tracking-widest mb-2">Advertisement</p>
-          <div className="h-32 bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700">
-            <span className="text-gray-400 font-medium">Place your ad here</span>
-          </div>
-        </div>
-
-        {/* Comments Section */}
-        <div className="p-8 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-naija" />
-            Comments ({comments.length})
-          </h3>
-
-          <form onSubmit={handleSubmitComment} className="mb-8 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
+  
+          {/* Comments Section */}
+          <div className="p-8 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-naija" />
+              Comments ({comments.length})
+            </h3>
+  
+            <form onSubmit={handleSubmitComment} className="mb-8 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    value={commentName}
+                    onChange={(e) => setCommentName(e.target.value)}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent dark:text-white focus:ring-2 focus:ring-naija focus:border-transparent outline-none transition-all"
+                    placeholder="Your name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email <span className="text-red-500">*</span></label>
+                  <input
+                    type="email"
+                    required
+                    value={commentEmail}
+                    onChange={(e) => setCommentEmail(e.target.value)}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent dark:text-white focus:ring-2 focus:ring-naija focus:border-transparent outline-none transition-all"
+                    placeholder="john@example.com"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Your email will not be published.</p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Comment <span className="text-red-500">*</span></label>
+                <textarea
                   required
-                  value={commentName}
-                  onChange={(e) => setCommentName(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent dark:text-white focus:ring-2 focus:ring-naija focus:border-transparent outline-none transition-all"
-                  placeholder="Your name"
-                />
+                  value={commentContent}
+                  onChange={(e) => setCommentContent(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent dark:text-white focus:ring-2 focus:ring-naija focus:border-transparent outline-none transition-all h-24 resize-none"
+                  placeholder="Share your thoughts..."
+                ></textarea>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email <span className="text-red-500">*</span></label>
-                <input
-                  type="email"
-                  required
-                  value={commentEmail}
-                  onChange={(e) => setCommentEmail(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent dark:text-white focus:ring-2 focus:ring-naija focus:border-transparent outline-none transition-all"
-                  placeholder="john@example.com"
-                />
-                <p className="text-xs text-gray-500 mt-1">Your email will not be published.</p>
-              </div>
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Comment <span className="text-red-500">*</span></label>
-              <textarea
-                required
-                value={commentContent}
-                onChange={(e) => setCommentContent(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent dark:text-white focus:ring-2 focus:ring-naija focus:border-transparent outline-none transition-all h-24 resize-none"
-                placeholder="Share your thoughts..."
-              ></textarea>
-            </div>
-            <button 
-              type="submit"
-              className="bg-naija hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
-            >
-              <Send className="w-4 h-4" /> Post Comment
-            </button>
-          </form>
-
-          <div className="space-y-4">
-            {comments.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">Be the first to comment!</p>
-            ) : (
-              comments.map(comment => (
-                <div key={comment.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-naija/10 rounded-full flex items-center justify-center text-naija font-bold text-xs">
-                        {comment.author.substring(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-sm text-gray-900 dark:text-white">{comment.author}</h4>
-                        <span className="text-xs text-gray-500">{new Date(comment.date).toLocaleString()}</span>
+              <button 
+                type="submit"
+                className="bg-naija hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <Send className="w-4 h-4" /> Post Comment
+              </button>
+            </form>
+  
+            <div className="space-y-4">
+              {comments.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">Be the first to comment!</p>
+              ) : (
+                comments.map(comment => (
+                  <div key={comment.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-naija/10 rounded-full flex items-center justify-center text-naija font-bold text-xs">
+                          {comment.author.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-gray-900 dark:text-white">{comment.author}</h4>
+                          <span className="text-xs text-gray-500">{new Date(comment.date).toLocaleString()}</span>
+                        </div>
                       </div>
                     </div>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm pl-11">{comment.content}</p>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm pl-11">{comment.content}</p>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-        </div>
-      </article>
-    </div>
-  );
-};
+        </article>
+      </div>
+    );
+  };
 
 const SubmitNewsPage: React.FC<{ 
   onBack: () => void; 
@@ -766,16 +801,18 @@ const AdminDashboard: React.FC<{
   pendingArticles: Article[];
   ads: Advertisement[];
   onPublish: (article: Article) => void;
+  onUpdate: (id: string, article: Article) => void;
   onDelete: (id: string) => void;
   onApproveSubmission: (article: Article) => void;
   onRejectSubmission: (id: string) => void;
   onApproveAd: (id: string) => void;
   onRejectAd: (id: string) => void;
   onLogout: () => void;
-}> = ({ articles, pendingArticles, ads, onPublish, onDelete, onApproveSubmission, onRejectSubmission, onApproveAd, onRejectAd, onLogout }) => {
+}> = ({ articles, pendingArticles, ads, onPublish, onUpdate, onDelete, onApproveSubmission, onRejectSubmission, onApproveAd, onRejectAd, onLogout }) => {
   const [activeTab, setActiveTab] = useState<'live' | 'pending' | 'compose' | 'ads'>('live');
   
-  // Compose State
+  // Compose/Edit State
+  const [editingId, setEditingId] = useState<string | null>(null); // Track if editing
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Politics');
   const [content, setContent] = useState('');
@@ -796,7 +833,25 @@ const AdminDashboard: React.FC<{
     }
   };
 
-  const handlePublish = (e: React.FormEvent) => {
+  // Populate form for editing
+  const handleEditClick = (article: Article) => {
+    setEditingId(article.id);
+    setTitle(article.title);
+    setCategory(article.category);
+    setContent(article.content);
+    setImagePreview(article.image);
+    setIsBreaking(article.isBreaking || false);
+    setActiveTab('compose');
+  };
+
+  // Safe Delete
+  const handleSafeDelete = (id: string) => {
+    if (window.confirm("Do you really want to delete this news item? This action cannot be undone.")) {
+      onDelete(id);
+    }
+  };
+
+  const handlePublishOrUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     const article: any = {
       title,
@@ -807,11 +862,22 @@ const AdminDashboard: React.FC<{
       content,
       isBreaking
     };
-    onPublish(article);
+
+    if (editingId) {
+      onUpdate(editingId, article);
+      alert('Article Updated Successfully!');
+      setEditingId(null);
+    } else {
+      onPublish(article);
+      alert('Article Published!');
+    }
+    
+    // Reset Form
     setTitle('');
     setContent('');
     setImagePreview('');
-    alert('Article Published!');
+    setIsBreaking(false);
+    if(editingId) setActiveTab('live');
   };
 
   return (
@@ -844,10 +910,16 @@ const AdminDashboard: React.FC<{
             Ad Requests ({ads.filter(a => a.status === 'Pending').length})
           </button>
           <button 
-            onClick={() => setActiveTab('compose')} 
+            onClick={() => {
+                setActiveTab('compose');
+                setEditingId(null);
+                setTitle('');
+                setContent('');
+                setImagePreview('');
+            }} 
             className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap ${activeTab === 'compose' ? 'bg-gray-900 text-white' : 'bg-white text-gray-600'}`}
           >
-            Compose New
+            {editingId ? 'Edit Article' : 'Compose New'}
           </button>
         </div>
 
@@ -862,9 +934,20 @@ const AdminDashboard: React.FC<{
                       <span className="text-xs text-gray-500">{article.category} • {article.date}</span>
                     </div>
                 </div>
-                <button onClick={() => onDelete(article.id)} className="text-red-500 hover:bg-red-50 p-2 rounded">
-                  <Trash2 className="w-5 h-5" />
-                </button>
+                <div className="flex gap-2">
+                    <button 
+                        onClick={() => handleEditClick(article)}
+                        className="text-blue-500 hover:bg-blue-50 p-2 rounded flex items-center gap-1 text-sm font-medium"
+                    >
+                        <PenTool className="w-4 h-4" /> Edit
+                    </button>
+                    <button 
+                        onClick={() => handleSafeDelete(article.id)} 
+                        className="text-red-500 hover:bg-red-50 p-2 rounded"
+                    >
+                        <Trash2 className="w-5 h-5" />
+                    </button>
+                </div>
               </div>
             ))}
           </div>
@@ -933,7 +1016,8 @@ const AdminDashboard: React.FC<{
 
         {activeTab === 'compose' && (
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
-            <form onSubmit={handlePublish} className="space-y-4">
+            <h3 className="text-xl font-bold mb-4 dark:text-white">{editingId ? 'Edit Article' : 'Compose New Article'}</h3>
+            <form onSubmit={handlePublishOrUpdate} className="space-y-4">
               <div className="flex gap-4">
                   <div className="flex-1">
                     <label className="block text-sm font-bold mb-1 dark:text-white">Headline</label>
@@ -943,10 +1027,12 @@ const AdminDashboard: React.FC<{
                     <label className="block text-sm font-bold mb-1 dark:text-white">Category</label>
                     <select value={category} onChange={e => setCategory(e.target.value)} className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white">
                       <option>Politics</option>
+                      <option>Metro</option>
                       <option>Business</option>
                       <option>Technology</option>
                       <option>Sports</option>
                       <option>Entertainment</option>
+                      <option>Education</option>
                       <option>Editorials</option>
                     </select>
                   </div>
@@ -968,7 +1054,9 @@ const AdminDashboard: React.FC<{
                 <label htmlFor="breaking" className="text-sm font-bold text-red-600">Mark as Breaking News</label>
               </div>
 
-              <button type="submit" className="bg-naija text-white px-6 py-3 rounded font-bold w-full hover:bg-green-700">Publish Live</button>
+              <button type="submit" className="bg-naija text-white px-6 py-3 rounded font-bold w-full hover:bg-green-700">
+                {editingId ? 'Update Article' : 'Publish Live'}
+              </button>
             </form>
           </div>
         )}
@@ -1009,12 +1097,10 @@ const Footer: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }
           <h3 className="font-bold mb-6 text-lg text-gray-900 dark:text-white">News Sections</h3>
           <ul className="space-y-3 text-gray-600 dark:text-gray-400 text-sm">
             <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Politics</li>
-            {/* ✅ METRO */}
             <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Metro</li>
             <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Business</li>
             <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Technology</li>
             <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Sports</li>
-            {/* ✅ EDUCATION */}
             <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Education</li>
             <li className="hover:text-naija cursor-pointer transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3" /> Editorials</li>
           </ul>
@@ -1066,9 +1152,9 @@ const Footer: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }
 
       {/* Copyright Row */}
       <div className="text-center pt-4">
-         <p className="text-gray-500 dark:text-gray-400 text-xs">
-           &copy; 2024 The People’s Platform. All rights reserved.
-         </p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs">
+            &copy; 2024 The People’s Platform. All rights reserved.
+          </p>
       </div>
     </div>
   </footer>
@@ -1086,6 +1172,19 @@ const App: React.FC = () => {
   const [isDark, setIsDark] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+
+  // FAVICON EFFECT: This adds the logo to the browser tab
+  useEffect(() => {
+    const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+    if (!link) {
+      const newLink = document.createElement('link');
+      newLink.rel = 'icon';
+      // Basic SVG data URI for the Globe icon used in the app
+      newLink.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23008753' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><line x1='2' y1='12' x2='22' y2='12'></line><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z'></path></svg>";
+      document.head.appendChild(newLink);
+    }
+    document.title = "The People's Platform";
+  }, []);
 
   // FETCH DATA ON LOAD
   useEffect(() => {
@@ -1141,6 +1240,27 @@ const App: React.FC = () => {
     }
   };
 
+  // NEW: Update Article
+  const handleUpdateArticle = async (id: string, articleData: Article) => {
+    try {
+        const response = await fetch(`${API_URL}/articles/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(articleData),
+        });
+
+        if (response.ok) {
+            const updated = await response.json();
+            const mapped = mapArticleFromDB(updated);
+            // Update local state
+            setArticles(articles.map(a => a.id === id ? mapped : a));
+        }
+    } catch(err) {
+        console.error("Update failed", err);
+        alert("Failed to update article");
+    }
+  };
+
   const handleSubmitAd = async (adData: Advertisement) => {
     try {
         const response = await fetch(`${API_URL}/ads`, {
@@ -1161,7 +1281,6 @@ const App: React.FC = () => {
   // Admin Actions
   const handleAdminLogin = async () => {
     setIsAdmin(true);
-    // Fetch pending items only when admin logs in
     try {
         const res = await fetch(`${API_URL}/admin/pending-articles`);
         const data = await res.json();
@@ -1171,9 +1290,7 @@ const App: React.FC = () => {
   };
 
   const handlePublish = async (articleData: Article) => {
-    // Admin direct publish
-    await handleSubmitNews(articleData); // Reuse submit logic
-    // Refresh list? In a real app we'd refetch.
+    await handleSubmitNews(articleData); 
   };
 
   const handleApproveSubmission = async (article: Article) => {
@@ -1192,7 +1309,6 @@ const App: React.FC = () => {
   };
 
   const handleRejectSubmission = (id: string) => {
-    // In a real app we would send a DELETE request or UPDATE status to 'rejected'
     setPendingArticles(pendingArticles.filter(a => a.id !== id));
   };
 
@@ -1201,9 +1317,7 @@ const App: React.FC = () => {
         const res = await fetch(`${API_URL}/admin/ads/${id}/approve`, { method: 'PATCH' });
         if (res.ok) {
             const updatedAd = await res.json();
-            setAds([...ads, updatedAd]); // It will show up now
-            // Remove from pending view logic (handled by filter in AdminDashboard)
-            // Ideally we refetch ads here
+            setAds([...ads, updatedAd]);
         }
     } catch (err) { console.error(err); }
   };
@@ -1212,9 +1326,15 @@ const App: React.FC = () => {
      setAds(ads.filter(a => a.id !== id));
   };
 
-  const handleDeleteArticle = (id: string) => {
-    // Implement delete endpoint call here
-    setArticles(articles.filter(a => a.id !== id));
+  const handleDeleteArticle = async (id: string) => {
+    try {
+        const res = await fetch(`${API_URL}/articles/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            setArticles(articles.filter(a => a.id !== id));
+        }
+    } catch (err) {
+        console.error("Delete failed", err);
+    }
   };
 
   // Filter logic
@@ -1222,13 +1342,11 @@ const App: React.FC = () => {
     ? articles 
     : articles.filter(a => a.category === selectedCategory);
   
-  // Get active ads
   const activeAds = ads.filter(a => a.status === 'active' || a.status === 'Active');
   const headerAd = activeAds.find(a => a.plan === 'Header Leaderboard');
   const sidebarAd = activeAds.find(a => a.plan === 'Sidebar Banner');
   const sponsoredAds = activeAds.filter(a => a.plan === 'Sponsored Article');
 
-  // Mix sponsored articles into feed
   const displayFeed = [...filteredArticles];
   sponsoredAds.forEach((ad, index) => {
     const insertIndex = (index + 1) * 3;
@@ -1247,8 +1365,9 @@ const App: React.FC = () => {
       <AdminDashboard 
         articles={articles}
         pendingArticles={pendingArticles}
-        ads={ads} // Pass all ads, dashboard filters for pending
+        ads={ads}
         onPublish={handlePublish}
+        onUpdate={handleUpdateArticle}
         onDelete={handleDeleteArticle}
         onApproveSubmission={handleApproveSubmission}
         onRejectSubmission={handleRejectSubmission}
@@ -1270,7 +1389,6 @@ const App: React.FC = () => {
       <main className="flex-grow">
         {view === 'home' && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Category Nav */}
             <div className="flex overflow-x-auto pb-4 mb-6 gap-2 scrollbar-hide">
                {['All', 'Politics', 'Metro', 'Business', 'Technology', 'Sports', 'Entertainment', 'Education', 'Editorials'].map(cat => (
                  <button 
@@ -1283,7 +1401,6 @@ const App: React.FC = () => {
                ))}
             </div>
 
-            {/* Hero Section (First Article) */}
             {filteredArticles.length > 0 && (
               <div className="mb-12 grid lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 cursor-pointer group" onClick={() => handleArticleClick(filteredArticles[0])}>
@@ -1332,7 +1449,6 @@ const App: React.FC = () => {
                     </div>
                   </div>
                   
-                  {/* Sidebar Ad */}
                   {sidebarAd ? (
                       <div className="bg-gray-100 dark:bg-gray-800 h-64 rounded-xl flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 dark:border-gray-700 overflow-hidden relative group">
                          <a href={sidebarAd.adUrl || '#'} target={sidebarAd.adUrl ? "_blank" : "_self"} className="w-full h-full">
@@ -1350,7 +1466,6 @@ const App: React.FC = () => {
               </div>
             )}
 
-            {/* Main Grid */}
             <h3 className="text-2xl font-serif font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
               <LayoutGrid className="w-6 h-6 text-naija" /> Latest Stories
             </h3>
@@ -1373,7 +1488,9 @@ const App: React.FC = () => {
         {view === 'article' && selectedArticle && (
           <ArticleReader 
             article={selectedArticle} 
+            allArticles={articles}
             onBack={() => setView('home')}
+            onNavigateToArticle={handleArticleClick}
             isAdmin={isAdmin}
           />
         )}
