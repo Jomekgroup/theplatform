@@ -12,7 +12,7 @@ import {
 // --- Configuration ---
 // ✅ LIVE BACKEND URL
 const API_URL = "https://platform-backend-54nn.onrender.com/api"; 
-// ✅ LIVE FRONTEND URL (For sharing links - Update this to your Vercel domain later if needed)
+// ✅ LIVE FRONTEND URL (For sharing links)
 const APP_URL = window.location.origin; 
 
 // --- Types ---
@@ -154,38 +154,41 @@ const Header: React.FC<{
 const ArticleCard: React.FC<{ article: Article; onClick: () => void }> = ({ article, onClick }) => (
   <div 
     onClick={onClick}
-    className="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 dark:border-gray-700"
+    className="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 dark:border-gray-700 flex flex-col"
   >
-    <div className="relative h-48 overflow-hidden">
+    <div className="relative h-48 overflow-hidden flex-shrink-0">
       <img 
         src={article.image || 'https://via.placeholder.com/400'} 
         alt={article.title}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
-      <div className="absolute top-4 left-4 flex gap-2">
-        <span className="bg-naija text-white text-xs font-bold px-3 py-1 rounded-full shadow-md uppercase tracking-wider">
-          {article.category}
-        </span>
-        {article.isBreaking && (
-          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md animate-pulse flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" /> Breaking
-          </span>
+       {article.isBreaking && (
+          <div className="absolute top-4 left-4">
+            <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md animate-pulse flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" /> Breaking
+            </span>
+          </div>
         )}
-      </div>
     </div>
-    <div className="p-5">
-      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-3">
-        <span className="font-medium text-gray-900 dark:text-gray-200">{article.author}</span>
-        <span>•</span>
-        <span>{article.date}</span>
+    <div className="p-5 flex flex-col flex-grow">
+      <div className="mb-3">
+        <span className="bg-naija text-white text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider inline-block mb-2">
+            {article.category}
+        </span>
+         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+            <span className="font-medium text-gray-900 dark:text-gray-200">{article.author}</span>
+            <span>•</span>
+            <span>{article.date}</span>
+        </div>
       </div>
-      <h3 className="font-serif text-xl font-bold text-gray-900 dark:text-white mb-2 leading-tight group-hover:text-naija transition-colors">
+     
+      <h3 className="font-serif text-xl font-bold text-gray-900 dark:text-white mb-2 leading-tight group-hover:text-naija transition-colors line-clamp-3">
         {article.title}
       </h3>
-      <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-3">
+      <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-3 mb-4 flex-grow">
         {article.excerpt}
       </p>
-      <div className="mt-4 flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+      <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
         <span className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
           <Users className="w-3 h-3" /> {article.views} reads
         </span>
@@ -198,8 +201,8 @@ const ArticleCard: React.FC<{ article: Article; onClick: () => void }> = ({ arti
 );
 
 const SponsoredArticleCard: React.FC<{ ad: Advertisement }> = ({ ad }) => (
-  <div className="group bg-green-50 dark:bg-green-900/20 rounded-xl overflow-hidden shadow-sm border-2 border-green-100 dark:border-green-800/50">
-    <div className="relative h-48 overflow-hidden">
+  <div className="group bg-green-50 dark:bg-green-900/20 rounded-xl overflow-hidden shadow-sm border-2 border-green-100 dark:border-green-800/50 flex flex-col">
+    <div className="relative h-48 overflow-hidden flex-shrink-0">
       <img 
         src={ad.adImage || 'https://via.placeholder.com/800x400?text=Sponsored+Content'} 
         alt={ad.clientName}
@@ -211,23 +214,25 @@ const SponsoredArticleCard: React.FC<{ ad: Advertisement }> = ({ ad }) => (
         </span>
       </div>
     </div>
-    <div className="p-5">
-      <h3 className="font-serif text-xl font-bold text-gray-900 dark:text-white mb-2 leading-tight">
+    <div className="p-5 flex flex-col flex-grow">
+      <h3 className="font-serif text-xl font-bold text-gray-900 dark:text-white mb-2 leading-tight line-clamp-3">
         {ad.adHeadline || `Spotlight on ${ad.clientName}`}
       </h3>
-      <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-3 mb-4">
+      <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-3 mb-4 flex-grow">
         {ad.adContent || "Check out this special feature from our partners."}
       </p>
-      {ad.adUrl && (
-          <a 
-          href={ad.adUrl} 
-          target="_blank" 
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 text-sm font-bold text-naija hover:underline"
-        >
-          Visit Website <ChevronRight className="w-4 h-4" />
-        </a>
-      )}
+      <div className="mt-auto">
+        {ad.adUrl && (
+            <a 
+            href={ad.adUrl} 
+            target="_blank" 
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-bold text-naija hover:underline"
+            >
+            Visit Website <ChevronRight className="w-4 h-4" />
+            </a>
+        )}
+      </div>
     </div>
   </div>
 );
@@ -299,27 +304,32 @@ const ArticleReader: React.FC<{
         </button>
   
         <article className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden mb-8">
-          <div className="h-64 md:h-96 w-full relative">
+          {/* IMAGE SECTION - NO TEXT OVERLAY */}
+          <div className="h-64 md:h-[500px] w-full relative">
             <img 
               src={article.image || 'https://via.placeholder.com/800'} 
               alt={article.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-8">
-              <span className="bg-naija text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4 inline-block">
-                {article.category}
-              </span>
-              <h1 className="text-3xl md:text-4xl font-serif font-bold text-white leading-tight">
-                {article.title}
-              </h1>
-              {article.subHeadline && (
-                <p className="text-gray-200 text-xl font-medium mt-2">{article.subHeadline}</p>
-              )}
-            </div>
           </div>
   
           <div className="p-8">
-            <div className="flex items-center justify-between py-6 border-b border-gray-100 dark:border-gray-700 mb-8 relative">
+            {/* HEADER SECTION - TEXT BELOW IMAGE */}
+            <div className="mb-8">
+                <span className="bg-naija text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4 inline-block">
+                    {article.category}
+                </span>
+                <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 dark:text-white leading-tight mb-4">
+                    {article.title}
+                </h1>
+                {article.subHeadline && (
+                    <p className="text-xl text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
+                        {article.subHeadline}
+                    </p>
+                )}
+            </div>
+
+            <div className="flex items-center justify-between py-6 border-y border-gray-100 dark:border-gray-700 mb-8 relative">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
                   <User className="w-6 h-6 text-gray-400" />
@@ -360,13 +370,12 @@ const ArticleReader: React.FC<{
               </div>
             </div>
   
+            {/* CONTENT - FULL JUSTIFICATION APPLIED */}
             <div className="prose dark:prose-invert max-w-none">
-              <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6 font-medium">
-                {article.excerpt}
-              </p>
-              <div className="text-gray-800 dark:text-gray-200 leading-loose space-y-4">
+              {/* Removed excerpt duplicate as subheadline is now prominent */}
+              <div className="text-gray-800 dark:text-gray-200 leading-loose space-y-4 text-lg">
                 {article.content.split('\n').map((paragraph, idx) => (
-                  <p key={idx}>{paragraph}</p>
+                  <p key={idx} className="text-justify">{paragraph}</p> 
                 ))}
               </div>
             </div>
@@ -381,14 +390,14 @@ const ArticleReader: React.FC<{
                           <div 
                               key={rel.id} 
                               onClick={() => onNavigateToArticle(rel)}
-                              className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md cursor-pointer transition-all"
+                              className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md cursor-pointer transition-all flex flex-col"
                           >
-                              <div className="h-32 overflow-hidden">
+                              <div className="h-32 overflow-hidden flex-shrink-0">
                                   <img src={rel.image} alt={rel.title} className="w-full h-full object-cover" />
                               </div>
-                              <div className="p-4">
-                                  <span className="text-xs text-naija font-bold uppercase">{rel.category}</span>
-                                  <h4 className="font-bold text-sm text-gray-900 dark:text-white mt-1 line-clamp-2">{rel.title}</h4>
+                              <div className="p-4 flex flex-col flex-grow">
+                                  <span className="text-xs text-naija font-bold uppercase mb-1">{rel.category}</span>
+                                  <h4 className="font-bold text-sm text-gray-900 dark:text-white leading-tight line-clamp-2 flex-grow">{rel.title}</h4>
                               </div>
                           </div>
                       ))}
@@ -1506,31 +1515,34 @@ const App: React.FC = () => {
 
             {filteredArticles.length > 0 && (
               <div className="mb-12 grid lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 cursor-pointer group" onClick={() => handleArticleClick(filteredArticles[0])}>
-                  <div className="relative h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-lg">
+                {/* HERO SECTION MODIFIED: Text is now BELOW the image container */}
+                <div className="lg:col-span-2 cursor-pointer group flex flex-col" onClick={() => handleArticleClick(filteredArticles[0])}>
+                  <div className="relative h-[400px] lg:h-[500px] rounded-t-2xl overflow-hidden shadow-lg flex-shrink-0">
                     <img 
                       src={filteredArticles[0].image || 'https://via.placeholder.com/800'} 
                       alt={filteredArticles[0].title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-8">
-                      <div className="flex gap-2 mb-3">
-                        <span className="bg-naija text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                    {filteredArticles[0].isBreaking && (
+                       <div className="absolute top-4 left-4">
+                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md animate-pulse flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" /> Breaking
+                          </span>
+                       </div>
+                    )}
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-8 rounded-b-2xl shadow-lg border-x border-b border-gray-100 dark:border-gray-700 flex-grow flex flex-col justify-center">
+                      <div className="mb-4">
+                        <span className="bg-naija text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm inline-block">
                           {filteredArticles[0].category}
                         </span>
-                        {filteredArticles[0].isBreaking && (
-                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">
-                            Breaking News
-                          </span>
-                        )}
                       </div>
-                      <h2 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold text-white mb-2 leading-tight shadow-sm">
+                      <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif font-bold text-gray-900 dark:text-white mb-4 leading-tight">
                         {filteredArticles[0].title}
                       </h2>
-                      <p className="text-gray-100 text-sm md:text-base line-clamp-2 max-w-2xl font-medium drop-shadow-md">
+                      <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed line-clamp-3">
                         {filteredArticles[0].subHeadline || filteredArticles[0].excerpt}
                       </p>
-                    </div>
                   </div>
                 </div>
 
