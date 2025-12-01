@@ -372,7 +372,6 @@ const ArticleReader: React.FC<{
   
             {/* CONTENT - FULL JUSTIFICATION APPLIED */}
             <div className="prose dark:prose-invert max-w-none">
-              {/* Removed excerpt duplicate as subheadline is now prominent */}
               <div className="text-gray-800 dark:text-gray-200 leading-loose space-y-4 text-lg">
                 {article.content.split('\n').map((paragraph, idx) => (
                   <p key={idx} className="text-justify">{paragraph}</p> 
@@ -1290,7 +1289,7 @@ const App: React.FC = () => {
       const newLink = document.createElement('link');
       newLink.rel = 'icon';
       // Basic SVG data URI for the Globe icon used in the app
-      newLink.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23008753' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><line x1='2' y1='12' x2='22' y2='12'></line><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z'></path></svg>";
+      newLink.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23008753' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><line x1='2' y1='12' x2='22' y2='12'></line><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'></path></svg>";
       document.head.appendChild(newLink);
     }
     document.title = "The People's Platform";
@@ -1341,7 +1340,16 @@ const App: React.FC = () => {
       });
 
       if (response.ok) {
-        alert("Thank you! Your story has been submitted for review.");
+        const newArticleDB = await response.json();
+        const newArticle = mapArticleFromDB(newArticleDB);
+
+        // If status is published (Staff), update state immediately
+        if (newArticle.status === 'published') {
+            setArticles(prev => [newArticle, ...prev]);
+            alert("Article Published Live!");
+        } else {
+            alert("Thank you! Your story has been submitted for review.");
+        }
         setView('home');
       }
     } catch (err) {
