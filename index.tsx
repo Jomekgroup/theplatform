@@ -197,9 +197,9 @@ function AdvertisePage({ onBack, onSubmitAd }: any) {
   const [adDoc, setAdDoc] = useState(''); // File content
 
   const plans = [
-    { name: 'Sidebar Banner', price: 20000 },
-    { name: 'Sponsored Article', price: 70000 },
-    { name: 'Header Leaderboard', price: 150000 },
+    { name: 'Sidebar Banner', price: 20000, features: ['Visible on all article pages', 'Square format', 'Weekly rotation'] },
+    { name: 'Sponsored Article', price: 70000, features: ['Full feature story', 'Permanent link', 'Shared on social media', 'In-feed native display'] },
+    { name: 'Header Leaderboard', price: 150000, features: ['Premium top placement', 'High visibility', 'Monthly duration', 'All pages'] },
   ];
 
   const handleFile = async (e: any, setter: any) => {
@@ -232,8 +232,15 @@ function AdvertisePage({ onBack, onSubmitAd }: any) {
           <div key={p.name} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border dark:border-gray-700 text-center flex flex-col h-full">
             <h3 className="font-bold text-lg dark:text-white">{p.name}</h3>
             <p className="text-2xl font-bold text-naija my-4">₦{p.price.toLocaleString()}</p>
-            <div className="flex-grow"></div>
-            <button onClick={() => handlePlanSelect(p)} className="w-full bg-black text-white py-2 rounded-lg text-sm mt-4">Choose Plan</button>
+            <div className="flex-grow text-left space-y-2 mb-4">
+              {p.features.map((feature, idx) => (
+                <div key={idx} className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                  <span>{feature}</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => handlePlanSelect(p)} className="w-full bg-black text-white py-2 rounded-lg text-sm mt-auto">Choose Plan</button>
           </div>
         ))}
       </div>
