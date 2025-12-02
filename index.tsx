@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { 
   Menu, Search, Bell, User, ChevronRight, MessageSquare, Share2, 
@@ -6,7 +6,7 @@ import {
   TrendingUp, Shield, FileText, Users, DollarSign, 
   LayoutGrid, PenTool, Image as ImageIcon, Sun, Moon,
   CreditCard, Trash2, Lock, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube,
-  Link as LinkIcon, ExternalLink, ArrowRight
+  Link as LinkIcon, ExternalLink, ArrowRight, RefreshCw
 } from 'lucide-react';
 
 // --- Configuration ---
@@ -14,6 +14,43 @@ import {
 const API_URL = "https://platform-backend-54nn.onrender.com/api"; 
 // ✅ LIVE FRONTEND URL (For sharing links)
 const APP_URL = window.location.origin; 
+
+// --- Error Boundary Component ---
+// This prevents the "White Screen of Death" if a component crashes
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(_: Error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center p-4">
+          <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong.</h1>
+          <p className="text-gray-600 mb-6">We couldn't load the application correctly.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // --- Types ---
 
@@ -44,9 +81,9 @@ interface Article {
 // Helper to match Database columns (snake_case) to Frontend (camelCase)
 const mapArticleFromDB = (dbArticle: any): Article => ({
   ...dbArticle,
-  subHeadline: dbArticle.sub_headline,
+  subHeadline: dbArticle.sub_headline || '',
   isBreaking: dbArticle.is_breaking, 
-  date: new Date(dbArticle.date).toLocaleDateString() 
+  date: dbArticle.date ? new Date(dbArticle.date).toLocaleDateString() : 'Just now'
 });
 
 interface Advertisement {
@@ -262,7 +299,9 @@ const ArticleReader: React.FC<{
     useEffect(() => {
       fetch(`${API_URL}/articles/${article.id}/comments`)
         .then(res => res.json())
-        .then(data => setComments(data))
+        .then(data => {
+            if(Array.isArray(data)) setComments(data);
+        })
         .catch(err => console.error("Error fetching comments:", err));
     }, [article.id]);
   
@@ -305,7 +344,6 @@ const ArticleReader: React.FC<{
         </button>
   
         <article className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden mb-8">
-          {/* IMAGE SECTION - CLEAN, NO TEXT */}
           <div className="h-64 md:h-[500px] w-full relative">
             <img 
               src={article.image || 'https://via.placeholder.com/800'} 
@@ -315,7 +353,6 @@ const ArticleReader: React.FC<{
           </div>
   
           <div className="p-8">
-            {/* TITLE & METADATA SECTION - BELOW IMAGE */}
             <div className="mb-8">
                 <div className="mb-4">
                     <span className="bg-naija text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
@@ -374,10 +411,9 @@ const ArticleReader: React.FC<{
               </div>
             </div>
   
-            {/* CONTENT - FULLY JUSTIFIED TEXT */}
             <div className="prose dark:prose-invert max-w-none">
               <div className="text-gray-800 dark:text-gray-200 leading-loose space-y-4 text-lg">
-                {article.content.split('\n').map((paragraph, idx) => (
+                {(article.content || '').split('\n').map((paragraph, idx) => (
                   <p key={idx} className="text-justify">{paragraph}</p> 
                 ))}
               </div>
@@ -408,7 +444,6 @@ const ArticleReader: React.FC<{
               </div>
           )}
   
-          {/* Advertisement */}
           <div className="bg-white dark:bg-gray-800 p-8 text-center border-t border-gray-100 dark:border-gray-700">
             <p className="text-sm text-gray-400 uppercase tracking-widest mb-2">Advertisement</p>
             <div className="h-32 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
@@ -416,7 +451,6 @@ const ArticleReader: React.FC<{
             </div>
           </div>
   
-          {/* Comments */}
           <div className="p-8 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-naija" />
@@ -521,7 +555,6 @@ const SubmitNewsPage: React.FC<{
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // PUBLIC SUBMISSION: NO STATUS SENT (Defaults to pending)
     const articleData: any = {
       title,
       category,
@@ -1217,4 +1250,8 @@ const AdminDashboard: React.FC<{
 };
 
 const root = createRoot(document.getElementById('root')!);
-root.render(<App />);
+root.render(
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+);
