@@ -6,12 +6,16 @@ import {
   TrendingUp, Shield, FileText, Users, DollarSign, 
   LayoutGrid, PenTool, Image as ImageIcon, Sun, Moon,
   CreditCard, Trash2, Lock, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube,
-  Link as LinkIcon, ExternalLink, ArrowRight, RefreshCw, UploadCloud, MapPin, Mail, Download
+  Link as LinkIcon, ExternalLink, ArrowRight, RefreshCw, Upload, MapPin, Mail, Download
 } from 'lucide-react';
 
 // --- Configuration ---
+// ✅ LIVE BACKEND URL
 const API_URL = "https://platform-backend-54nn.onrender.com/api"; 
+// ✅ LIVE FRONTEND URL (For sharing links)
 const APP_URL = window.location.origin; 
+
+// ✅ CENTRAL CATEGORIES LIST
 const CATEGORIES = [
   'Politics', 'Metro', 'Business', 'Technology', 'Sports', 
   'Entertainment', 'Education', 'Leadership', 'Editorials'
@@ -62,7 +66,7 @@ const handleSocialShare = (platform: string, title: string) => {
     if(link) window.open(link, '_blank');
 };
 
-// --- Shared Components ---
+// --- Components ---
 
 function Header({ onNavigate, toggleTheme, isDark, activeAd }: any) {
   return (
@@ -132,7 +136,6 @@ function SponsoredArticleCard({ ad }: { ad: Advertisement }) {
 }
 
 function Footer({ onNavigate, onCategorySelect }: any) {
-  const currentYear = new Date().getFullYear();
   return (
     <footer className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white pt-10 pb-6 border-t border-gray-200 dark:border-gray-700 mt-auto">
       <div className="max-w-7xl mx-auto px-4">
@@ -167,13 +170,11 @@ function Footer({ onNavigate, onCategorySelect }: any) {
             <p className="text-[10px] text-gray-400">Email: <a href="mailto:theplatformreport@gmail.com" className="hover:text-naija">theplatformreport@gmail.com</a></p>
           </div>
         </div>
-        <div className="text-center text-xs text-gray-400">&copy; {currentYear} The Platform. All rights reserved.</div>
+        <div className="text-center text-xs text-gray-400">&copy; 2024 The Platform. All rights reserved.</div>
       </div>
     </footer>
   );
 }
-
-// --- Page Components ---
 
 function SupportPage({ onBack }: any) {
     const [form, setForm] = useState({name:'', email:'', subject:'General Inquiry', message:''});
@@ -323,7 +324,7 @@ function AdminDashboard({ articles, pendingArticles, ads, onPublish, onUpdate, o
                         <h4 className="font-bold text-sm">{a.plan}</h4>
                         <p className="text-xs text-gray-500">Client: {a.clientName} ({a.email})</p>
                     </div>
-                    <span className="text-green-600 font-mono font-bold text-sm">₦{a.amount.toLocaleString()}</span>
+                    <span className="text-green-600 font-mono font-bold text-sm">₦{a.amount?.toLocaleString() || '0'}</span>
                 </div>
                 
                 <div className="bg-gray-50 p-3 rounded text-xs mb-3 border">
@@ -380,41 +381,10 @@ function AdminDashboard({ articles, pendingArticles, ads, onPublish, onUpdate, o
   );
 }
 
-function SubmitNewsPage({ onBack, onSubmit }: any) {
-  const [form, setForm] = useState({ title: '', category: 'Politics', content: '', image: '' });
-  
-  const submit = (e: any) => {
-    e.preventDefault();
-    onSubmit({ ...form, author: 'Citizen Reporter' });
-  };
-
-  const handleFile = async (e: any) => {
-    if(e.target.files?.[0]) setForm({...form, image: await readFileAsDataURL(e.target.files[0])});
-  };
-
-  return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <button onClick={onBack} className="mb-6 flex items-center text-gray-500 text-sm"><ChevronRight className="w-4 h-4 rotate-180"/> Back</button>
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
-        <h2 className="text-2xl font-bold mb-6 dark:text-white">Submit Story</h2>
-        <form onSubmit={submit} className="space-y-4">
-            <input required placeholder="Headline" value={form.title} onChange={e=>setForm({...form, title:e.target.value})} className="w-full border p-3 rounded" />
-            <select value={form.category} onChange={e=>setForm({...form, category:e.target.value})} className="w-full border p-3 rounded">
-                {CATEGORIES.map(c=><option key={c}>{c}</option>)}
-            </select>
-            <input type="file" onChange={handleFile} className="text-sm" />
-            <textarea required placeholder="Content" value={form.content} onChange={e=>setForm({...form, content:e.target.value})} className="w-full border p-3 rounded h-40" />
-            <button className="bg-naija text-white w-full py-3 rounded font-bold">Submit for Review</button>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-// --- AdvertisePage Component with Two-Step Modal ---
+// --- AdvertisePage Component (REPAIRED) ---
 function AdvertisePage({ onBack, onSubmitAd }: any) {
   const [showModal, setShowModal] = useState(false);
-  const [step, setStep] = useState<'info' | 'form'>('info'); // 'info' or 'form'
+  const [step, setStep] = useState<'info' | 'form'>('info');
   const [plan, setPlan] = useState<any>(null);
   
   // Form State
@@ -499,7 +469,7 @@ function AdvertisePage({ onBack, onSubmitAd }: any) {
               {step === 'info' ? (
                 <div className="text-center space-y-3">
                   <div className="bg-green-50 dark:bg-gray-800 p-3 rounded-lg border border-green-100 dark:border-gray-600">
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Pay <span className="font-bold text-black dark:text-white">₦{plan?.price.toLocaleString()}</span> to:</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Pay <span className="font-bold text-black dark:text-white">₦{plan?.price?.toLocaleString()}</span> to:</p>
                     <p className="font-bold text-sm text-naija mt-1">4092144856</p>
                     <p className="text-xs font-bold text-gray-700 dark:text-gray-300">Polaris Bank</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Clean Connect</p>
@@ -524,7 +494,7 @@ function AdvertisePage({ onBack, onSubmitAd }: any) {
                     <input type="file" required accept="image/*" onChange={e => handleFile(e, setAdImg)} className="w-full text-[10px] dark:text-gray-400" />
                   </div>
 
-                  <div className="text-xs">
+                  <div className="text-xs border-t pt-2 dark:border-gray-700">
                     <label className="block mb-1 font-bold dark:text-gray-300">Payment Receipt</label>
                     <input type="file" required accept="image/*" onChange={e => handleFile(e, setReceipt)} className="w-full text-[10px] dark:text-gray-400" />
                   </div>
@@ -536,124 +506,6 @@ function AdvertisePage({ onBack, onSubmitAd }: any) {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function ArticleReader({ article, allArticles, onBack, onNavigateToArticle, isAdmin }: any) {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [form, setForm] = useState({ name: '', email: '', content: '' });
-  const [showShare, setShowShare] = useState(false);
-
-  useEffect(() => {
-    window.scrollTo(0,0);
-    fetch(`${API_URL}/articles/${article.id}/comments`).then(r=>r.json()).then(d=> Array.isArray(d) && setComments(d)).catch(console.error);
-  }, [article.id]);
-
-  const postComment = async (e: any) => {
-    e.preventDefault();
-    const res = await fetch(`${API_URL}/comments`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ articleId: article.id, author: form.name, email: form.email, content: form.content })
-    });
-    if(res.ok) {
-        setComments([await res.json(), ...comments]);
-        setForm({name:'', email:'', content:''});
-    }
-  };
-
-  const related = allArticles.filter((a: any) => a.category === article.category && a.id !== article.id).slice(0,3);
-
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <button onClick={onBack} className="flex items-center gap-1 text-gray-500 mb-4 text-sm"><ChevronRight className="w-4 h-4 rotate-180"/> Back</button>
-      
-      <article className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-        <div className="h-64 md:h-[400px] w-full bg-gray-100">
-            <img src={article.image} alt={article.title} className="w-full h-full object-cover object-center" />
-        </div>
-        <div className="p-6 md:p-8">
-            <span className="bg-naija text-white text-xs font-bold px-2 py-1 rounded uppercase">{article.category}</span>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 dark:text-white mt-3 mb-2">{article.title}</h1>
-            {article.subHeadline && <h2 className="text-lg text-gray-600 dark:text-gray-300 font-medium mb-4 pl-4 border-l-4 border-naija">{article.subHeadline}</h2>}
-            
-            <div className="flex items-center justify-between py-4 border-y dark:border-gray-700 mb-6">
-                <div className="flex items-center gap-2 text-sm">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <span className="font-bold dark:text-white">{article.author}</span>
-                    <span className="text-gray-400">• {article.date}</span>
-                </div>
-                <div className="relative">
-                    <button onClick={() => setShowShare(!showShare)} className="text-gray-400 hover:text-naija"><Share2 className="w-5 h-5" /></button>
-                    {showShare && (
-                        <div className="absolute right-0 top-8 bg-white dark:bg-gray-700 shadow-xl border p-2 rounded z-10 w-32 flex flex-col gap-1">
-                            {['whatsapp','facebook','twitter','linkedin'].map(p => (
-                                <button key={p} onClick={()=>handleSocialShare(p, article.title)} className="text-left text-xs capitalize p-1 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-white">{p}</button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="prose dark:prose-invert max-w-none text-justify text-gray-800 dark:text-gray-200">
-                {article.content.split('\n').map((p:string, i:number) => <p key={i} className="mb-4 leading-relaxed">{p}</p>)}
-            </div>
-        </div>
-
-        {related.length > 0 && (
-            <div className="bg-gray-50 dark:bg-gray-900 p-6 md:p-8 border-t dark:border-gray-700">
-                <h3 className="font-bold text-lg mb-4 dark:text-white">Related News</h3>
-                <div className="grid md:grid-cols-3 gap-4">
-                    {related.map((r:any) => (
-                        <div key={r.id} onClick={()=>onNavigateToArticle(r)} className="bg-white dark:bg-gray-800 rounded shadow-sm overflow-hidden cursor-pointer flex flex-col">
-                            <img src={r.image} className="h-32 w-full object-cover object-center" />
-                            <div className="p-3 flex-grow"><h4 className="font-bold text-sm line-clamp-2 dark:text-white">{r.title}</h4></div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        )}
-
-        <div className="p-6 md:p-8 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-            <h3 className="font-bold text-lg mb-4 dark:text-white">Comments ({comments.length})</h3>
-            <form onSubmit={postComment} className="mb-6 bg-white dark:bg-gray-800 p-4 rounded shadow-sm">
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                    <input required placeholder="Name" value={form.name} onChange={e=>setForm({...form, name:e.target.value})} className="border p-2 rounded text-sm dark:bg-gray-700 dark:text-white" />
-                    <input required placeholder="Email" value={form.email} onChange={e=>setForm({...form, email:e.target.value})} className="border p-2 rounded text-sm dark:bg-gray-700 dark:text-white" />
-                </div>
-                <textarea required placeholder="Comment..." value={form.content} onChange={e=>setForm({...form, content:e.target.value})} className="border p-2 rounded text-sm w-full h-20 dark:bg-gray-700 dark:text-white mb-3" />
-                <button type="submit" className="bg-naija text-white px-4 py-2 rounded text-sm font-bold">Post Comment</button>
-            </form>
-            <div className="space-y-3">
-                {comments.map(c => (
-                    <div key={c.id} className="bg-white dark:bg-gray-800 p-3 rounded border dark:border-gray-700">
-                        <div className="flex justify-between text-xs mb-1">
-                            <span className="font-bold dark:text-white">{c.author}</span>
-                            <span className="text-gray-500">{new Date(c.date).toLocaleString()}</span>
-                        </div>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">{c.content}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-      </article>
-    </div>
-  );
-}
-
-function StaffLoginPage({ onLogin, onBack }: any) {
-  const [pw, setPw] = useState('');
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-sm text-center">
-        <Lock className="w-10 h-10 mx-auto mb-4 text-gray-700 dark:text-white" />
-        <h2 className="text-xl font-bold mb-6 dark:text-white">Staff Login</h2>
-        <form onSubmit={(e)=>{e.preventDefault(); if(pw==='adminOdohhhhh1@') onLogin(); else alert('Invalid Code');}}>
-            <input autoFocus type="password" placeholder="Access Code" value={pw} onChange={e=>setPw(e.target.value)} className="w-full p-3 border rounded mb-4 dark:bg-gray-700 dark:text-white" />
-            <button className="w-full bg-black text-white py-3 rounded font-bold mb-2">Login</button>
-            <button type="button" onClick={onBack} className="text-sm text-gray-500">Back Home</button>
-        </form>
-      </div>
     </div>
   );
 }
@@ -673,7 +525,7 @@ function App() {
   // Initial Load
   useEffect(() => {
     const link = document.createElement('link'); link.rel='icon'; 
-    link.href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23008753' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><line x1='2' y1='12' x2='22' y2='12'></line><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'></path></svg>";
+    link.href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23008753' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><line x1='2' y1='12' x2='22' y2='12'></line><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z'></path></svg>";
     document.head.appendChild(link);
     document.title = "The Platform";
 
