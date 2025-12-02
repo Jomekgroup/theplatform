@@ -16,7 +16,6 @@ const API_URL = "https://platform-backend-54nn.onrender.com/api";
 const APP_URL = window.location.origin; 
 
 // --- Error Boundary Component ---
-// This prevents the "White Screen of Death" if a component crashes
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
     super(props);
@@ -555,6 +554,7 @@ const SubmitNewsPage: React.FC<{
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // PUBLIC SUBMISSION: NO STATUS SENT (Defaults to pending)
     const articleData: any = {
       title,
       category,
@@ -771,7 +771,7 @@ const AdvertisePage: React.FC<{
       {/* Payment Modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-xl w-full max-w-md p-5 relative shadow-2xl max-h-[85vh] overflow-y-auto border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-900 rounded-xl w-full max-w-sm max-h-[80vh] overflow-y-auto p-5 relative shadow-2xl border border-gray-200 dark:border-gray-700">
             <button 
               onClick={() => setShowPaymentModal(false)}
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
@@ -787,27 +787,27 @@ const AdvertisePage: React.FC<{
                             <CreditCard className="w-8 h-8 text-naija" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold mb-2 dark:text-white">Payment Details</h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-6">Please make a transfer of <span className="font-bold">₦{plans.find(p => p.name === selectedPlan)?.price.toLocaleString()}</span> to the account below.</p>
+                    <h3 className="text-xl font-bold mb-2 dark:text-white">Payment Details</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">Please make a transfer of <span className="font-bold">₦{plans.find(p => p.name === selectedPlan)?.price.toLocaleString()}</span> to the account below.</p>
                     
-                    <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 mb-8 space-y-4">
+                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 mb-6 space-y-3">
                         <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
-                            <span className="text-sm text-gray-500 dark:text-gray-400">Bank Name</span>
-                            <span className="font-bold text-gray-900 dark:text-white">Polaris Bank</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Bank Name</span>
+                            <span className="font-bold text-sm text-gray-900 dark:text-white">Polaris Bank</span>
                         </div>
                         <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
-                            <span className="text-sm text-gray-500 dark:text-gray-400">Account Name</span>
-                            <span className="font-bold text-gray-900 dark:text-white">Clean Connect</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Account Name</span>
+                            <span className="font-bold text-sm text-gray-900 dark:text-white">Clean Connect</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-500 dark:text-gray-400">Account Number</span>
-                            <span className="font-mono font-bold text-xl text-naija">4092144856</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Account Number</span>
+                            <span className="font-mono font-bold text-lg text-naija">4092144856</span>
                         </div>
                     </div>
 
                     <button 
                         onClick={() => setPaymentStep('form')}
-                        className="w-full bg-naija text-white py-3 rounded-lg font-bold hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                        className="w-full bg-naija text-white py-3 rounded-lg font-bold text-sm hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                     >
                         I Have Made Payment <ArrowRight className="w-4 h-4" />
                     </button>
@@ -817,44 +817,44 @@ const AdvertisePage: React.FC<{
             {/* STEP 2: SUBMISSION FORM */}
             {paymentStep === 'form' && (
                 <>
-                    <h3 className="text-2xl font-bold mb-6 dark:text-white">Complete Ad Submission</h3>
-                    <form onSubmit={handleSubmitProof} className="space-y-4">
+                    <h3 className="text-xl font-bold mb-4 dark:text-white">Complete Ad Submission</h3>
+                    <form onSubmit={handleSubmitProof} className="space-y-3">
                     <div>
-                        <label className="block text-sm font-medium mb-1 dark:text-gray-300">Your Name / Business Name</label>
-                        <input required type="text" value={clientName} onChange={e => setClientName(e.target.value)} className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
+                        <label className="block text-xs font-medium mb-1 dark:text-gray-300">Your Name / Business Name</label>
+                        <input required type="text" value={clientName} onChange={e => setClientName(e.target.value)} className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1 dark:text-gray-300">Email Address</label>
-                        <input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
+                        <label className="block text-xs font-medium mb-1 dark:text-gray-300">Email Address</label>
+                        <input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
                     </div>
 
                     {selectedPlan === 'Sponsored Article' && (
                         <>
                         <div>
-                            <label className="block text-sm font-medium mb-1 dark:text-gray-300">Article Headline</label>
-                            <input required type="text" value={adHeadline} onChange={e => setAdHeadline(e.target.value)} className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="e.g. The Rise of Fintech" />
+                            <label className="block text-xs font-medium mb-1 dark:text-gray-300">Article Headline</label>
+                            <input required type="text" value={adHeadline} onChange={e => setAdHeadline(e.target.value)} className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="e.g. The Rise of Fintech" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1 dark:text-gray-300">Article Content</label>
-                            <textarea required value={adContent} onChange={e => setAdContent(e.target.value)} className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white h-32" placeholder="Paste your article text here..." />
+                            <label className="block text-xs font-medium mb-1 dark:text-gray-300">Article Content</label>
+                            <textarea required value={adContent} onChange={e => setAdContent(e.target.value)} className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white h-24" placeholder="Paste your article text here..." />
                         </div>
                         </>
                     )}
 
-                    <div className="border-t pt-4 dark:border-gray-700">
-                        <p className="font-bold mb-2 dark:text-white">Upload Ad Creative</p>
-                        <label className="block text-sm font-medium mb-1 dark:text-gray-300">
+                    <div className="border-t pt-3 dark:border-gray-700">
+                        <p className="font-bold text-xs mb-2 dark:text-white">Upload Ad Creative</p>
+                        <label className="block text-xs font-medium mb-1 dark:text-gray-300">
                         {selectedPlan === 'Sponsored Article' ? 'Article Header Image' : 'Ad Banner Image'}
                         </label>
-                        <input required type="file" accept="image/*" onChange={handleAdImageChange} className="w-full text-sm dark:text-gray-300 mb-2" />
+                        <input required type="file" accept="image/*" onChange={handleAdImageChange} className="w-full text-xs dark:text-gray-300 mb-2" />
                     </div>
 
-                    <div className="border-t pt-4 dark:border-gray-700">
-                        <label className="block text-sm font-medium mb-1 dark:text-gray-300">Upload Proof of Payment (Screenshot/Receipt)</label>
-                        <input required type="file" accept="image/*" onChange={handleReceiptChange} className="w-full text-sm dark:text-gray-300" />
+                    <div className="border-t pt-3 dark:border-gray-700">
+                        <label className="block text-xs font-medium mb-1 dark:text-gray-300">Upload Proof of Payment (Screenshot/Receipt)</label>
+                        <input required type="file" accept="image/*" onChange={handleReceiptChange} className="w-full text-xs dark:text-gray-300" />
                     </div>
 
-                    <button type="submit" className="w-full bg-naija text-white py-3 rounded-lg font-bold hover:bg-green-700 mt-4">
+                    <button type="submit" className="w-full bg-naija text-white py-3 rounded-lg font-bold text-sm hover:bg-green-700 mt-2">
                         Submit Proof & Creative
                     </button>
                     </form>
