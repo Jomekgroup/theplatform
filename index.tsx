@@ -10,8 +10,12 @@ import {
 } from 'lucide-react';
 
 // --- Configuration ---
+// ✅ LIVE BACKEND URL
 const API_URL = "https://platform-backend-54nn.onrender.com/api"; 
+// ✅ LIVE FRONTEND URL (For sharing links)
 const APP_URL = window.location.origin; 
+
+// ✅ CENTRAL CATEGORIES LIST
 const CATEGORIES = [
   'Politics', 'Metro', 'Business', 'Technology', 'Sports', 
   'Entertainment', 'Education', 'Leadership', 'Editorials'
@@ -156,7 +160,7 @@ function Footer({ onNavigate, onCategorySelect }: any) {
               <li className="hover:text-naija cursor-pointer" onClick={()=>onNavigate('home')}>Home</li>
               <li className="hover:text-naija cursor-pointer" onClick={()=>onNavigate('advertise')}>Advertise</li>
               <li className="hover:text-naija cursor-pointer" onClick={()=>onNavigate('support')}>Support & Contact</li>
-              <li className="text-gray-300 hover:text-gray-400 cursor-pointer mt-2 pt-2 text-[10px]" onClick={()=>onNavigate('login')}>Staff Access</li>
+              <li className="text-gray-300 hover:text-gray-400 cursor-pointer mt-2 pt-2 text-[10px]" onClick={()=>{ onNavigate('login'); window.scrollTo(0,0); }}>Staff Access</li>
             </ul>
           </div>
           <div>
@@ -175,6 +179,8 @@ function Footer({ onNavigate, onCategorySelect }: any) {
 function SupportPage({ onBack }: any) {
     const [form, setForm] = useState({name:'', email:'', subject:'General Inquiry', message:''});
     const [status, setStatus] = useState('');
+
+    useEffect(() => { window.scrollTo(0,0); }, []);
 
     const submit = async (e:React.FormEvent) => {
         e.preventDefault();
@@ -380,6 +386,8 @@ function AdminDashboard({ articles, pendingArticles, ads, onPublish, onUpdate, o
 function SubmitNewsPage({ onBack, onSubmit }: any) {
   const [form, setForm] = useState({ title: '', category: 'Politics', content: '', image: '' });
   
+  useEffect(() => { window.scrollTo(0,0); }, []);
+
   const submit = (e: any) => {
     e.preventDefault();
     onSubmit({ ...form, author: 'Citizen Reporter' });
@@ -423,6 +431,8 @@ function AdvertisePage({ onBack, onSubmitAd }: any) {
   const [adImg, setAdImg] = useState('');
   const [adDoc, setAdDoc] = useState(''); 
 
+  useEffect(() => { window.scrollTo(0,0); }, []);
+
   const plans = [
     { name: 'Sidebar Banner', price: 20000, features: ['Visible on all article pages', 'Square format', 'Weekly rotation'] },
     { name: 'Sponsored Article', price: 70000, features: ['Full feature story', 'Permanent link', 'Shared on social media', 'In-feed native display'] },
@@ -441,6 +451,12 @@ function AdvertisePage({ onBack, onSubmitAd }: any) {
       receiptImage: receipt, adImage: adImg, adHeadline: headline, adContent: content, adContentFile: adDoc
     });
     setShowModal(false);
+  };
+
+  const handlePlanSelect = (p: any) => {
+    setSelectedPlan(p);
+    setStep('info');
+    setShowModal(true);
   };
 
   return (
@@ -467,7 +483,7 @@ function AdvertisePage({ onBack, onSubmitAd }: any) {
             </div>
             <div className="p-6 pt-0">
               <button 
-                onClick={() => { setSelectedPlan(p); setStep('info'); setShowModal(true); }}
+                onClick={() => handlePlanSelect(p)}
                 className="w-full bg-black text-white py-2 rounded-lg text-sm mt-auto"
               >
                 Choose Plan
@@ -531,6 +547,41 @@ function AdvertisePage({ onBack, onSubmitAd }: any) {
   );
 }
 
+function StaffLoginPage({ onLogin, onBack }: any) {
+  const [pw, setPw] = useState('');
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === 'adminOdohhhhh1@') {
+      onLogin();
+    } else {
+      setError('Invalid Access Code');
+    }
+  };
+  // Fixed variable names here to match state
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-sm text-center">
+        <Lock className="w-10 h-10 mx-auto mb-4 text-gray-700 dark:text-white" />
+        <h2 className="text-xl font-bold mb-6 dark:text-white">Staff Login</h2>
+        <form onSubmit={handleSubmit}>
+            <input autoFocus type="password" placeholder="Access Code" value={password} onChange={e=>setPassword(e.target.value)} className="w-full p-3 border rounded mb-4 dark:bg-gray-700 dark:text-white" />
+            <button className="w-full bg-black text-white py-3 rounded font-bold mb-2">Login</button>
+            <button type="button" onClick={onBack} className="text-sm text-gray-500">Back Home</button>
+        </form>
+        {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+      </div>
+    </div>
+  );
+}
+
 // --- Main App Component ---
 function App() {
   const [view, setView] = useState('home');
@@ -546,7 +597,7 @@ function App() {
   // Initial Load
   useEffect(() => {
     const link = document.createElement('link'); link.rel='icon'; 
-    link.href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23008753' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><line x1='2' y1='12' x2='22' y2='12'></line><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'></path></svg>";
+    link.href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23008753' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><line x1='2' y1='12' x2='22' y2='12'></line><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z'></path></svg>";
     document.head.appendChild(link);
     document.title = "The Platform";
 
