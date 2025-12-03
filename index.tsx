@@ -46,7 +46,7 @@ const mapArticleFromDB = (dbArticle: any): Article => ({
   date: dbArticle.date ? new Date(dbArticle.date).toLocaleDateString() : 'Just now'
 });
 
-// ⚡️ NEW: IMAGE COMPRESSION FUNCTION
+// Image Compression
 const readFileAsDataURL = (file: File): Promise<string> => {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -54,13 +54,15 @@ const readFileAsDataURL = (file: File): Promise<string> => {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const scaleFactor = 800 / img.width; // Resize to max 800px width
+        const scaleFactor = 800 / img.width; 
         canvas.width = 800;
         canvas.height = img.height * scaleFactor;
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.7)); // Compress quality
+        resolve(canvas.toDataURL('image/jpeg', 0.7)); 
       };
+      // Fallback for non-images (PDFs etc)
+      img.onerror = () => resolve(event.target?.result as string);
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
@@ -321,7 +323,6 @@ function AdminDashboard({ articles, pendingArticles, ads, onPublish, onUpdate, o
   const toggleSupportStatus = async (msg: SupportMsg) => {
     const newStatus = msg.status === 'treated' ? 'unread' : 'treated';
     setSupportMsgs(supportMsgs.map(m => m.id === msg.id ? {...m, status: newStatus} : m));
-    // We'll assume we can patch it, or just update local state if backend update isn't critical immediately
   };
 
   const handleFile = async (e: any) => { if(e.target.files?.[0]) setForm({...form, image: await readFileAsDataURL(e.target.files[0])}); };
@@ -407,22 +408,37 @@ function AdminDashboard({ articles, pendingArticles, ads, onPublish, onUpdate, o
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 mb-3">
-                    <div><p className="text-[10px] font-bold">Receipt</p><img src={a.receiptImage} className="h-24 object-cover border w-full" /></div>
-                    <div><p className="text-[10px] font-bold">Ad Creative</p>{a.adImage && <img src={a.adImage} className="h-24 object-cover border w-full" />}</div>
+                    <div>
+                        <p className="text-[10px] font-bold">Receipt</p>
+                        {a.receiptImage ? (
+                            <a href={a.receiptImage} target="_blank" rel="noreferrer">
+                                <img src={a.receiptImage} className="h-24 object-cover border w-full rounded hover:opacity-80 transition-opacity" />
+                            </a>
+                        ) : <span className="text-xs text-gray-400">No Receipt</span>}
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-bold">Ad Creative</p>
+                        {a.adImage ? (
+                            <a href={a.adImage} target="_blank" rel="noreferrer">
+                                <img src={a.adImage} className="h-24 object-cover border w-full rounded hover:opacity-80 transition-opacity" />
+                            </a>
+                        ) : <span className="text-xs text-gray-400">No Image</span>}
+                    </div>
                 </div>
 
                 <div className="flex gap-2 mt-2">
-                    {a.status === 'Pending' && (
+                    {/* Fix: Ensure status check is case-insensitive */}
+                    {a.status && a.status.toLowerCase() === 'pending' && (
                         <>
-                            <button onClick={()=>onApproveAd(a.id)} className="bg-green-500 text-white px-3 py-2 rounded text-xs flex-1 font-bold">Approve</button>
-                            <button onClick={()=>onRejectAd(a.id)} className="bg-red-500 text-white px-3 py-2 rounded text-xs flex-1 font-bold">Reject</button>
+                            <button onClick={()=>onApproveAd(a.id)} className="bg-green-500 text-white px-3 py-2 rounded text-xs flex-1 font-bold hover:bg-green-600">Approve</button>
+                            <button onClick={()=>onRejectAd(a.id)} className="bg-red-500 text-white px-3 py-2 rounded text-xs flex-1 font-bold hover:bg-red-600">Reject</button>
                         </>
                     )}
                     <button onClick={() => { if(confirm('Delete Advert?')) onDeleteAd(a.id) }} className="border border-red-200 text-red-500 hover:bg-red-50 px-3 py-2 rounded text-xs font-bold ml-auto">
                         <Trash2 className="w-4 h-4" />
                     </button>
                 </div>
-                {a.status === 'Active' && <span className="text-green-600 font-bold text-xs flex items-center gap-1 mt-2"><CheckCircle className="w-3 h-3"/> Active</span>}
+                {a.status && a.status.toLowerCase() === 'active' && <span className="text-green-600 font-bold text-xs flex items-center gap-1 mt-2"><CheckCircle className="w-3 h-3"/> Active</span>}
             </div>
         ))}
 
@@ -466,116 +482,6 @@ function AdminDashboard({ articles, pendingArticles, ads, onPublish, onUpdate, o
             </>
         )}
       </div>
-    </div>
-  );
-}
-
-// ✅ RESTORED ArticleReader COMPONENT
-function ArticleReader({ article, allArticles, onBack, onNavigateToArticle, isAdmin }: any) {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [form, setForm] = useState({ name: '', email: '', content: '' });
-  const [showShare, setShowShare] = useState(false);
-
-  useEffect(() => {
-    window.scrollTo(0,0);
-    fetch(`${API_URL}/articles/${article.id}/comments`)
-      .then(r => r.json())
-      .then(d => { if (Array.isArray(d)) setComments(d); })
-      .catch(console.error);
-  }, [article.id]);
-
-  const postComment = async (e: any) => {
-    e.preventDefault();
-    const res = await fetch(`${API_URL}/comments`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ articleId: article.id, author: form.name, email: form.email, content: form.content })
-    });
-    if(res.ok) {
-        setComments([await res.json(), ...comments]);
-        setForm({name:'', email:'', content:''});
-    }
-  };
-
-  const related = allArticles.filter((a: any) => a.category === article.category && a.id !== article.id).slice(0,3);
-
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <button onClick={onBack} className="flex items-center gap-1 text-gray-500 mb-4 text-sm"><ChevronRight className="w-4 h-4 rotate-180"/> Back to News</button>
-      
-      <article className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-        {/* Image */}
-        <div className="h-64 md:h-[400px] w-full bg-gray-100">
-            <img src={article.image} alt={article.title} className="w-full h-full object-cover object-center" />
-        </div>
-        
-        {/* Content */}
-        <div className="p-6 md:p-8">
-            <span className="bg-naija text-white text-xs font-bold px-2 py-1 rounded uppercase">{article.category}</span>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 dark:text-white mt-3 mb-2">{article.title}</h1>
-            {article.subHeadline && <h2 className="text-lg text-gray-600 dark:text-gray-300 font-medium mb-4 pl-4 border-l-4 border-naija">{article.subHeadline}</h2>}
-            
-            <div className="flex items-center justify-between py-4 border-y dark:border-gray-700 mb-6">
-                <div className="flex items-center gap-2 text-sm">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <span className="font-bold dark:text-white">{article.author}</span>
-                    <span className="text-gray-400">• {article.date}</span>
-                </div>
-                <div className="relative">
-                    <button onClick={() => setShowShare(!showShare)} className="text-gray-400 hover:text-naija"><Share2 className="w-5 h-5" /></button>
-                    {showShare && (
-                        <div className="absolute right-0 top-8 bg-white dark:bg-gray-700 shadow-xl border p-2 rounded z-10 w-32 flex flex-col gap-1">
-                            {['whatsapp','facebook','twitter','linkedin'].map(p => (
-                                <button key={p} onClick={()=>handleSocialShare(p, article.title)} className="text-left text-xs capitalize p-1 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-white">{p}</button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="prose dark:prose-invert max-w-none text-justify text-gray-800 dark:text-gray-200">
-                {(article.content || '').split('\n').map((p:string, i:number) => <p key={i} className="mb-4 leading-relaxed">{p}</p>)}
-            </div>
-        </div>
-
-        {/* Related */}
-        {related.length > 0 && (
-            <div className="bg-gray-50 dark:bg-gray-900 p-6 md:p-8 border-t dark:border-gray-700">
-                <h3 className="font-bold text-lg mb-4 dark:text-white">Related News</h3>
-                <div className="grid md:grid-cols-3 gap-4">
-                    {related.map((r:any) => (
-                        <div key={r.id} onClick={()=>onNavigateToArticle(r)} className="bg-white dark:bg-gray-800 rounded shadow-sm overflow-hidden cursor-pointer flex flex-col">
-                            <img src={r.image} className="h-32 w-full object-cover object-center" />
-                            <div className="p-3 flex-grow"><h4 className="font-bold text-sm line-clamp-2 dark:text-white">{r.title}</h4></div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        )}
-
-        {/* Comments */}
-        <div className="p-6 md:p-8 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-            <h3 className="font-bold text-lg mb-4 dark:text-white">Comments ({comments.length})</h3>
-            <form onSubmit={postComment} className="mb-6 bg-white dark:bg-gray-800 p-4 rounded shadow-sm">
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                    <input required placeholder="Name" value={form.name} onChange={e=>setForm({...form, name:e.target.value})} className="border p-2 rounded text-sm dark:bg-gray-700 dark:text-white" />
-                    <input required placeholder="Email" value={form.email} onChange={e=>setForm({...form, email:e.target.value})} className="border p-2 rounded text-sm dark:bg-gray-700 dark:text-white" />
-                </div>
-                <textarea required placeholder="Comment..." value={form.content} onChange={e=>setForm({...form, content:e.target.value})} className="border p-2 rounded text-sm w-full h-20 dark:bg-gray-700 dark:text-white mb-3" />
-                <button type="submit" className="bg-naija text-white px-4 py-2 rounded text-sm font-bold">Post Comment</button>
-            </form>
-            <div className="space-y-3">
-                {comments.map(c => (
-                    <div key={c.id} className="bg-white dark:bg-gray-800 p-3 rounded border dark:border-gray-700">
-                        <div className="flex justify-between text-xs mb-1">
-                            <span className="font-bold dark:text-white">{c.author}</span>
-                            <span className="text-gray-500">{new Date(c.date).toLocaleString()}</span>
-                        </div>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">{c.content}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-      </article>
     </div>
   );
 }
