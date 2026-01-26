@@ -7,7 +7,7 @@ import {
   TrendingUp, Shield, FileText, Users, DollarSign, 
   LayoutGrid, PenTool, Image as ImageIcon, Sun, Moon,
   CreditCard, Trash2, Lock, Globe, Home, Briefcase,
-  Link as LinkIcon, Video
+  Link as LinkIcon, Video, Plus, Edit3
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
@@ -139,7 +139,7 @@ The future of AGI will be a test of global solidarity. Will this technology be t
     category: 'Politics',
     author: 'Chijioke Nwosu',
     date: '3 hours ago',
-    image: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&q=80&w=1000',
+    image: 'https://images.unsplash.com/photo-1540910419892-f7e722a49266?auto=format&fit=crop&q=80&w=1000',
     excerpt: 'In a surprise move that has shaken the political landscape, major opposition figures have met in Abuja to discuss a unified front.',
     content: `With the next general election still years away, the political drums are already beating a familiar rhythm of realignment. Yesterday’s high-profile meeting in Abuja between key figures from the PDP, LP, and NNPP has sent shockwaves through the ruling APC’s camp, signaling an early start to the 2027 campaign.
 
@@ -843,25 +843,8 @@ const SubmitNewsPage: React.FC<{
 
 const App: React.FC = () => {
   const [route, setRoute] = useState({ view: 'home', id: '' });
-  const [articles, setArticles] = useState<Article[]>([]);
-const [pendingArticles, setPendingArticles] = useState<Article[]>([]);
-const [isLoading, setIsLoading] = useState(true);
-
-useEffect(() => {
-  // This function fetches your news from Render/Supabase
-  const syncWithDatabase = async () => {
-    try {
-      const response = await fetch('https://https://platform-backend-54nn.onrender.com/articles');
-      const data = await response.json();
-      setArticles(data);
-    } catch (error) {
-      console.error("Connection to newsroom failed", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  syncWithDatabase();
-}, []);
+  const [articles, setArticles] = useState<Article[]>(INITIAL_ARTICLES);
+  const [pendingArticles, setPendingArticles] = useState<Article[]>([]);
   const [comments, setComments] = useState<Record<string, Comment[]>>(INITIAL_COMMENTS);
   const [ads, setAds] = useState<Advertisement[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -924,70 +907,22 @@ useEffect(() => {
   if (route.view === 'admin' && isAdmin) {
     return (
       <AdminDashboard 
-  articles={articles} 
-  pendingArticles={pendingArticles} 
-  ads={ads}
-  onPublish={async (a) => {
-    // 1. Permanently save a new article created by Admin
-    await fetch('https://platform-backend-54nn.onrender.com/api/articles', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(a)
-    });
-    setArticles([a, ...articles]);
-  }} 
-  onDelete={async (id) => {
-    // 2. Fixed double https:// and added /api/
-    await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${id}`, { 
-      method: 'DELETE' 
-    });
-    setArticles(articles.filter(a => a.id !== id));
-  }}
-  onApproveSubmission={async (a) => { 
-    // 3. Move from 'Pending' to 'Live' on the server
-    await fetch('https://platform-backend-54nn.onrender.com/api/articles', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(a)
-    });
-    // Remove from pending
-    await fetch(`https://platform-backend-54nn.onrender.com/api/pending-articles/${a.id}`, { 
-      method: 'DELETE' 
-    });
-    
-    setArticles([a, ...articles]); 
-    setPendingArticles(pendingArticles.filter(p => p.id !== a.id)); 
-  }}
-  onRejectSubmission={async (id) => {
-    // 4. Fixed typo and path
-    await fetch(`https://platform-backend-54nn.onrender.com/api/pending-articles/${id}`, { 
-      method: 'DELETE' 
-    });
-    setPendingArticles(pendingArticles.filter(p => p.id !== id));
-  }}
-  onApproveAd={async (id) => {
-    // 5. Fixed typo and path
-    await fetch(`https://platform-backend-54nn.onrender.com/api/ads/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'Active' })
-    });
-    setAds(ads.map(ad => ad.id === id ? { ...ad, status: 'Active' } : ad));
-  }}
-  onRejectAd={async (id) => {
-    // Added fetch for Rejection so it saves to database
-    await fetch(`https://platform-backend-54nn.onrender.com/api/ads/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'Rejected' })
-    });
-    setAds(ads.map(ad => ad.id === id ? { ...ad, status: 'Rejected' } : ad));
-  }}
-  onLogout={() => { setIsAdmin(false); navigate('home'); }}
-/>
+        articles={articles} pendingArticles={pendingArticles} ads={ads}
+        onPublish={a => setArticles([a, ...articles])} onDelete={id => setArticles(articles.filter(a => a.id !== id))}
+        onUpdate={updatedArt => setArticles(prev => prev.map(a => a.id === updatedArt.id ? updatedArt : a))}
+        onApproveSubmission={a => { setArticles([a, ...articles]); setPendingArticles(pendingArticles.filter(p => p.id !== a.id)); }}
+        onRejectSubmission={id => setPendingArticles(pendingArticles.filter(p => p.id !== id))}
+        onApproveAd={id => setAds(ads.map(ad => ad.id === id ? { ...ad, status: 'Active' } : ad))}
+        onRejectAd={id => setAds(ads.map(ad => ad.id === id ? { ...ad, status: 'Rejected' } : ad))}
+        onLogout={() => { setIsAdmin(false); navigate('home'); }}
+      />
+    );
+  }
+
   if (route.view === 'login') {
     return <StaffLoginPage onLogin={() => { setIsAdmin(true); navigate('admin'); }} onBack={() => navigate('home')} />;
   }
+
   // Categories list stays manageable
   const allCategories = ['All', 'Government', 'International', 'Education', 'Metro', 'Lifestyle', 'Politics', 'Business', 'Technology', 'Sports', 'Entertainment', 'Editorials'];
 
@@ -1093,62 +1028,8 @@ useEffect(() => {
           />
         )}
 
-<main className="flex-grow">
-        {route.view === 'home' && (
-           /* ... existing home code remains same ... */
-        )}
-
-        {route.view === 'article' && activeArticle && (
-          <ArticleReader 
-            article={activeArticle} 
-            onBack={() => navigate('home')}
-            comments={comments[activeArticle.id] || []}
-            onAddComment={async (c) => {
-              // SAVE COMMENT TO DATABASE
-              await fetch('https://platform-backend-54nn.onrender.com/comments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(c)
-              });
-              setComments(p => ({ ...p, [c.articleId]: [c, ...(p[c.articleId] || [])] }));
-            }}
-            onDeleteComment={id => setComments(p => ({ ...p, [activeArticle.id]: p[activeArticle.id].filter(c => c.id !== id) }))}
-            isAdmin={isAdmin}
-            activeAd={sidebarAd}
-          />
-        )}
-
-        {route.view === 'submit' && (
-          <SubmitNewsPage 
-            onBack={() => navigate('home')} 
-            onSubmit={async (a) => { 
-              // SAVE STORY TO DATABASE
-              await fetch('https://https://platform-backend-54nn.onrender.com/pending-articles', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(a)
-              });
-              setPendingArticles([a, ...pendingArticles]); 
-              alert("Your story has been submitted for editorial review. Thank you!"); 
-              navigate('home'); 
-            }} 
-          />
-        )}
-
-        {route.view === 'advertise' && (
-          <AdvertisePage 
-            onBack={() => navigate('home')} 
-            onSubmitAd={async (a) => {
-              // SAVE AD TO DATABASE
-              await fetch('https://https://platform-backend-54nn.onrender.com/ads', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(a)
-              });
-              setAds([a, ...ads]);
-            }} 
-          />
-        )}
+        {route.view === 'submit' && <SubmitNewsPage onBack={() => navigate('home')} onSubmit={a => { setPendingArticles([a, ...pendingArticles]); alert("Your story has been submitted for editorial review. Thank you for being a part of the platform!"); navigate('home'); }} />}
+        {route.view === 'advertise' && <AdvertisePage onBack={() => navigate('home')} onSubmitAd={a => setAds([a, ...ads])} />}
       </main>
 
       <Footer onNavigate={navigate} />
@@ -1317,19 +1198,118 @@ const StaffLoginPage: React.FC<{ onLogin: () => void; onBack: () => void }> = ({
   );
 };
 
+const AdminComposeForm: React.FC<{ 
+  initialData?: Article; 
+  onSave: (a: Article) => void; 
+  onCancel?: () => void 
+}> = ({ initialData, onSave, onCancel }) => {
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [category, setCategory] = useState(initialData?.category || 'Metro');
+  const [content, setContent] = useState(initialData?.content || '');
+  const [image, setImage] = useState(initialData?.image || '');
+  const categories = ['Government', 'International', 'Education', 'Metro', 'Lifestyle', 'Politics', 'Business', 'Technology', 'Sports', 'Entertainment', 'Editorials'];
+
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const b64 = await readFileAsDataURL(e.target.files[0]);
+      setImage(b64);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title || !content || !image) return alert("Please fill all required fields");
+    onSave({
+      id: initialData?.id || Date.now().toString(),
+      title,
+      category,
+      author: initialData?.author || 'Editorial Desk',
+      date: initialData?.date || 'Just now',
+      image,
+      excerpt: content.substring(0, 150) + '...',
+      content,
+      views: initialData?.views || '0',
+      isBreaking: initialData?.isBreaking
+    });
+    if (!initialData) {
+      setTitle('');
+      setContent('');
+      setImage('');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 md:p-10 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-naija/10 rounded-2xl"><Plus className="w-6 h-6 text-naija" /></div>
+          <h2 className="text-2xl font-serif font-bold dark:text-white">{initialData ? 'Edit Article' : 'Compose New Editorial'}</h2>
+        </div>
+        {onCancel && (
+          <button type="button" onClick={onCancel} className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+            <CloseIcon className="w-6 h-6" />
+          </button>
+        )}
+      </div>
+      <div className="grid gap-6">
+        <div>
+          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Headline</label>
+          <input required type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full p-4 border rounded-xl dark:bg-gray-900 dark:border-gray-700 dark:text-white font-bold outline-none focus:ring-2 focus:ring-naija" placeholder="Enter the main title..." />
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Category</label>
+            <select value={category} onChange={e => setCategory(e.target.value)} className="w-full p-4 border rounded-xl dark:bg-gray-900 dark:border-gray-700 dark:text-white font-bold outline-none">
+              {categories.map(c => <option key={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Feature Image</label>
+            <input type="file" onChange={handleImage} className="w-full text-xs text-gray-500" />
+            {image && <img src={image} className="mt-4 h-24 rounded-lg shadow-sm object-cover" />}
+          </div>
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Article Body</label>
+          <textarea required value={content} onChange={e => setContent(e.target.value)} className="w-full p-6 border rounded-xl dark:bg-gray-900 dark:border-gray-700 dark:text-white h-96 font-serif leading-loose outline-none focus:ring-2 focus:ring-naija" placeholder="Tell the story..." />
+        </div>
+        <div className="flex gap-4">
+          <button type="submit" className="flex-1 bg-naija text-white py-5 rounded-2xl font-bold uppercase tracking-widest shadow-xl shadow-green-500/20 active:scale-95 transition-all">
+            {initialData ? 'Save Changes' : 'Publish to Live Feed'}
+          </button>
+          {onCancel && (
+            <button type="button" onClick={onCancel} className="px-8 border border-gray-200 dark:border-gray-700 dark:text-white rounded-2xl font-bold uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+              Cancel
+            </button>
+          )}
+        </div>
+      </div>
+    </form>
+  );
+};
+
 const AdminDashboard: React.FC<{
   articles: Article[];
   pendingArticles: Article[];
   ads: Advertisement[];
   onPublish: (article: Article) => void;
   onDelete: (id: string) => void;
+  onUpdate: (article: Article) => void;
   onApproveSubmission: (article: Article) => void;
   onRejectSubmission: (id: string) => void;
   onApproveAd: (id: string) => void;
   onRejectAd: (id: string) => void;
   onLogout: () => void;
-}> = ({ articles, pendingArticles, ads, onPublish, onDelete, onApproveSubmission, onRejectSubmission, onApproveAd, onRejectAd, onLogout }) => {
+}> = ({ articles, pendingArticles, ads, onPublish, onDelete, onUpdate, onApproveSubmission, onRejectSubmission, onApproveAd, onRejectAd, onLogout }) => {
   const [activeTab, setActiveTab] = useState<'live' | 'pending' | 'compose' | 'ads'>('live');
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+
+  const handleEditSave = (updated: Article) => {
+    onUpdate(updated);
+    setEditingArticle(null);
+    alert("Article updated successfully!");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="bg-white dark:bg-gray-800 shadow-md px-4 md:px-8 py-4 md:py-6 flex justify-between items-center sticky top-0 z-[60] border-b border-gray-100 dark:border-gray-700">
@@ -1337,76 +1317,102 @@ const AdminDashboard: React.FC<{
         <button onClick={onLogout} className="text-red-500 font-bold uppercase tracking-widest text-[10px] px-3 py-1.5 md:px-4 md:py-2 border border-red-100 dark:border-red-900/30 rounded-xl hover:bg-red-50 transition-all">Sign Out</button>
       </div>
       <div className="max-w-7xl mx-auto p-4 md:p-10">
-        <div className="flex gap-2 md:gap-4 mb-6 md:mb-10 overflow-x-auto pb-4 scrollbar-hide">
-          {['live', 'pending', 'ads', 'compose'].map((t: any) => (
-            <button key={t} onClick={() => setActiveTab(t)} className={`px-4 md:px-6 py-2.5 md:py-3 rounded-xl md:rounded-2xl font-bold uppercase tracking-widest text-[10px] md:text-xs transition-all whitespace-nowrap ${activeTab === t ? 'bg-naija text-white shadow-xl shadow-green-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-700'}`}>
-              {t} {t === 'live' ? `(${articles.length})` : t === 'pending' ? `(${pendingArticles.length})` : t === 'ads' ? `(${ads.filter(a => a.status === 'Pending').length})` : ''}
-            </button>
-          ))}
-        </div>
-        {activeTab === 'live' && (
-          <div className="grid gap-4 md:gap-6">
-            {articles.map(a => (
-              <div key={a.id} className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center group hover:shadow-lg transition-all">
-                <div className="flex gap-4 md:gap-6 items-center overflow-hidden">
-                  <img src={a.image} className="w-14 h-14 md:w-20 md:h-20 object-cover rounded-xl md:rounded-2xl shadow-md shrink-0" />
-                  <div className="overflow-hidden">
-                    <h3 className="font-serif font-bold dark:text-white text-sm md:text-lg group-hover:text-naija transition-colors truncate">{a.title}</h3>
-                    <div className="flex items-center gap-2 md:gap-3 mt-1 md:mt-2">
-                       <span className="text-[9px] md:text-[10px] font-bold text-naija uppercase tracking-widest">{a.category}</span>
-                       <span className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">{a.date}</span>
+        {!editingArticle ? (
+          <>
+            <div className="flex gap-2 md:gap-4 mb-6 md:mb-10 overflow-x-auto pb-4 scrollbar-hide">
+              {['live', 'pending', 'ads', 'compose'].map((t: any) => (
+                <button key={t} onClick={() => setActiveTab(t)} className={`px-4 md:px-6 py-2.5 md:py-3 rounded-xl md:rounded-2xl font-bold uppercase tracking-widest text-[10px] md:text-xs transition-all whitespace-nowrap ${activeTab === t ? 'bg-naija text-white shadow-xl shadow-green-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-700'}`}>
+                  {t} {t === 'live' ? `(${articles.length})` : t === 'pending' ? `(${pendingArticles.length})` : t === 'ads' ? `(${ads.filter(a => a.status === 'Pending').length})` : ''}
+                </button>
+              ))}
+            </div>
+            {activeTab === 'live' && (
+              <div className="grid gap-4 md:gap-6">
+                {articles.map(a => (
+                  <div key={a.id} className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center group hover:shadow-lg transition-all">
+                    <div className="flex gap-4 md:gap-6 items-center overflow-hidden">
+                      <img src={a.image} className="w-14 h-14 md:w-20 md:h-20 object-cover rounded-xl md:rounded-2xl shadow-md shrink-0" />
+                      <div className="overflow-hidden">
+                        <h3 className="font-serif font-bold dark:text-white text-sm md:text-lg group-hover:text-naija transition-colors truncate">{a.title}</h3>
+                        <div className="flex items-center gap-2 md:gap-3 mt-1 md:mt-2">
+                           <span className="text-[9px] md:text-[10px] font-bold text-naija uppercase tracking-widest">{a.category}</span>
+                           <span className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">{a.date}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <button 
+                        onClick={() => setEditingArticle(a)}
+                        className="text-naija hover:bg-green-50 dark:hover:bg-green-900/20 p-2 md:p-3 rounded-xl transition-all"
+                      >
+                        <Edit3 className="w-4 h-4 md:w-5 md:h-5" />
+                      </button>
+                      <button 
+                        onClick={() => onDelete(a.id)} 
+                        className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 md:p-3 rounded-xl transition-all"
+                      >
+                        <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+                      </button>
                     </div>
                   </div>
-                </div>
-                <button onClick={() => onDelete(a.id)} className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 md:p-3 rounded-xl transition-all shrink-0"><Trash2 className="w-4 h-4 md:w-5 md:h-5" /></button>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
-        {activeTab === 'pending' && (
-          <div className="grid gap-6">
-            {pendingArticles.map(a => (
-              <div key={a.id} className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700">
-                <h3 className="font-serif font-bold text-xl md:text-2xl dark:text-white mb-4">{a.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm mb-6 md:mb-8 leading-relaxed italic line-clamp-3">{a.excerpt}</p>
-                <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                   <button onClick={() => onApproveSubmission(a)} className="bg-naija text-white px-6 md:px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-green-500/20">Approve Story</button>
-                   <button onClick={() => onRejectSubmission(a.id)} className="bg-red-500 text-white px-6 md:px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-red-500/20">Reject Submission</button>
-                </div>
+            )}
+            {activeTab === 'pending' && (
+              <div className="grid gap-6">
+                {pendingArticles.map(a => (
+                  <div key={a.id} className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700">
+                    <h3 className="font-serif font-bold text-xl md:text-2xl dark:text-white mb-4">{a.title}</h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm mb-6 md:mb-8 leading-relaxed italic line-clamp-3">{a.excerpt}</p>
+                    <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+                       <button onClick={() => onApproveSubmission(a)} className="bg-naija text-white px-6 md:px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-green-500/20">Approve Story</button>
+                       <button onClick={() => onRejectSubmission(a.id)} className="bg-red-500 text-white px-6 md:px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-red-500/20">Reject Submission</button>
+                    </div>
+                  </div>
+                ))}
+                {pendingArticles.length === 0 && <div className="text-center py-20 text-gray-400 font-bold uppercase tracking-widest text-xs">No pending stories</div>}
               </div>
-            ))}
-            {pendingArticles.length === 0 && <div className="text-center py-20 text-gray-400 font-bold uppercase tracking-widest text-xs">No pending stories</div>}
-          </div>
-        )}
-        {activeTab === 'ads' && (
-          <div className="grid gap-6 md:gap-8">
-            {ads.filter(ad => ad.status === 'Pending').map(ad => (
-               <div key={ad.id} className="bg-white dark:bg-gray-800 p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border-l-8 border-yellow-500">
-                 <div className="flex flex-col sm:flex-row justify-between items-start mb-6 md:mb-8 gap-4">
-                    <div>
-                       <h3 className="font-bold text-xl md:text-2xl dark:text-white">{ad.plan}</h3>
-                       <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mt-1">Client: {ad.clientName} ({ad.email})</p>
-                    </div>
-                    <span className="bg-yellow-100 text-yellow-600 px-4 py-2 rounded-xl font-bold uppercase tracking-widest text-[10px]">Verify Payment</span>
-                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 my-6 md:my-8">
-                    <div className="space-y-4 text-center">
-                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Creative / Ad Visual</p>
-                       <img src={ad.adImage} className="max-h-48 md:max-h-64 mx-auto rounded-2xl shadow-xl border dark:border-gray-700" />
-                    </div>
-                    <div className="space-y-4 text-center">
-                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Bank Transfer Receipt</p>
-                       <img src={ad.receiptImage} className="max-h-48 md:max-h-64 mx-auto rounded-2xl shadow-xl border dark:border-gray-700 cursor-zoom-in" onClick={() => window.open(ad.receiptImage, '_blank')} />
-                    </div>
-                 </div>
-                 <div className="flex flex-col sm:flex-row gap-4 pt-6 md:pt-8 border-t dark:border-gray-700">
-                    <button onClick={() => onApproveAd(ad.id)} className="flex-1 bg-naija text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg">Verify & Activate</button>
-                    <button onClick={() => onRejectAd(ad.id)} className="flex-1 bg-red-500 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg">Decline Ad</button>
-                 </div>
-               </div>
-            ))}
-            {ads.filter(ad => ad.status === 'Pending').length === 0 && <div className="text-center py-20 text-gray-400 font-bold uppercase tracking-widest text-xs">No pending advertisements</div>}
-          </div>
+            )}
+            {activeTab === 'ads' && (
+              <div className="grid gap-6 md:gap-8">
+                {ads.filter(ad => ad.status === 'Pending').map(ad => (
+                   <div key={ad.id} className="bg-white dark:bg-gray-800 p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border-l-8 border-yellow-500">
+                     <div className="flex flex-col sm:flex-row justify-between items-start mb-6 md:mb-8 gap-4">
+                        <div>
+                           <h3 className="font-bold text-xl md:text-2xl dark:text-white">{ad.plan}</h3>
+                           <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mt-1">Client: {ad.clientName} ({ad.email})</p>
+                        </div>
+                        <span className="bg-yellow-100 text-yellow-600 px-4 py-2 rounded-xl font-bold uppercase tracking-widest text-[10px]">Verify Payment</span>
+                     </div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 my-6 md:my-8">
+                        <div className="space-y-4 text-center">
+                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Creative / Ad Visual</p>
+                           <img src={ad.adImage} className="max-h-48 md:max-h-64 mx-auto rounded-2xl shadow-xl border dark:border-gray-700" />
+                        </div>
+                        <div className="space-y-4 text-center">
+                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Bank Transfer Receipt</p>
+                           <img src={ad.receiptImage} className="max-h-48 md:max-h-64 mx-auto rounded-2xl shadow-xl border dark:border-gray-700 cursor-zoom-in" onClick={() => window.open(ad.receiptImage, '_blank')} />
+                        </div>
+                     </div>
+                     <div className="flex flex-col sm:flex-row gap-4 pt-6 md:pt-8 border-t dark:border-gray-700">
+                        <button onClick={() => onApproveAd(ad.id)} className="flex-1 bg-naija text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg">Verify & Activate</button>
+                        <button onClick={() => onRejectAd(ad.id)} className="flex-1 bg-red-500 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg">Decline Ad</button>
+                     </div>
+                   </div>
+                ))}
+                {ads.filter(ad => ad.status === 'Pending').length === 0 && <div className="text-center py-20 text-gray-400 font-bold uppercase tracking-widest text-xs">No pending advertisements</div>}
+              </div>
+            )}
+            {activeTab === 'compose' && (
+              <AdminComposeForm onSave={onPublish} />
+            )}
+          </>
+        ) : (
+          <AdminComposeForm 
+            initialData={editingArticle} 
+            onSave={handleEditSave} 
+            onCancel={() => setEditingArticle(null)} 
+          />
         )}
       </div>
     </div>
