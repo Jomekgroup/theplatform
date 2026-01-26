@@ -905,62 +905,73 @@ const App: React.FC = () => {
   const sidebarAd = ads.find(a => a.status === 'Active' && a.plan === 'Sidebar Banner');
 
   // ... inside your render function
-  if (route.view === 'admin') {
+ if (route.view === 'admin') {
+  return (
+    <AdminDashboard 
+      articles={articles} 
+      pendingArticles={pendingArticles} 
+      ads={ads}
+      onPublish={async (a) => {
+        const res = await fetch('https://platform-backend-54nn.onrender.com/api/articles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...a, status: 'published' }) 
+        });
+        const saved = await res.json();
+        setArticles([saved, ...articles]);
+      }} 
+      onUpdate={async (a) => {
+        const res = await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${a.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(a)
+        });
+        if (res.ok) setArticles(articles.map(art => art.id === a.id ? a : art));
+      }}
+      onDelete={async (id) => {
+        if (!confirm("Delete permanently?")) return;
+        await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${id}`, { method: 'DELETE' });
+        setArticles(articles.filter(a => a.id !== id));
+      }}
+      onApproveSubmission={async (a) => { 
+        const res = await fetch(`https://platform-backend-54nn.onrender.com/api/admin/articles/${a.id}/approve`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'published' })
+        });
+        if (res.ok) {
+          const approved = await res.json();
+          setArticles([approved, ...articles]); 
+          setPendingArticles(pendingArticles.filter(p => p.id !== a.id)); 
+        }
+      }}
+      onRejectSubmission={async (id) => {
+        await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${id}`, { method: 'DELETE' });
+        setPendingArticles(pendingArticles.filter(p => p.id !== id));
+      }}
+      onApproveAd={async (id) => {
+        await fetch(`https://platform-backend-54nn.onrender.com/api/admin/ads/${id}/approve`, { method: 'PATCH' });
+        setAds(ads.map(ad => ad.id === id ? { ...ad, status: 'Active' } : ad));
+      }}
+      onRejectAd={async (id) => {
+        await fetch(`https://platform-backend-54nn.onrender.com/api/ads/${id}`, { method: 'DELETE' });
+        setAds(ads.filter(ad => ad.id !== id));
+      }}
+      onLogout={() => { setIsAdmin(false); navigate('home'); }}
+    />
+  );
+}
+    ); // <--- Ensure this semicolon and closing paren exist!
+  } // <--- Ensure this closing brace exists!
+
+  if (route.view === 'login') {
     return (
-      <AdminDashboard 
-  articles={articles} 
-  pendingArticles={pendingArticles} 
-  ads={ads}
-  onPublish={async (a) => {
-    // 1. Admin creates a published article directly
-    await fetch('https://platform-backend-54nn.onrender.com/api/articles', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...a, status: 'published' }) 
-    });
-    setArticles([a, ...articles]);
-  }} 
-  onDelete={async (id) => {
-    // 2. Delete article using the correct ID path
-    await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${id}`, { 
-      method: 'DELETE' 
-    });
-    setArticles(articles.filter(a => a.id !== id));
-  }}
-  onApproveSubmission={async (a) => { 
-    // 3. Use your specific backend 'approve' route
-    await fetch(`https://platform-backend-54nn.onrender.com/api/admin/articles/${a.id}/approve`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ isBreaking: a.is_breaking || false })
-    });
-    
-    setArticles([a, ...articles]); 
-    setPendingArticles(pendingArticles.filter(p => p.id !== a.id)); 
-  }}
-  onRejectSubmission={async (id) => {
-    // 4. Rejecting a submission just deletes it from the database
-    await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${id}`, { 
-      method: 'DELETE' 
-    });
-    setPendingArticles(pendingArticles.filter(p => p.id !== id));
-  }}
-  onApproveAd={async (id) => {
-    // 5. Use your specific backend 'ad approve' route
-    await fetch(`https://platform-backend-54nn.onrender.com/api/admin/ads/${id}/approve`, {
-      method: 'PATCH'
-    });
-    setAds(ads.map(ad => ad.id === id ? { ...ad, status: 'active' } : ad));
-  }}
-  onRejectAd={async (id) => {
-    // 6. Use your new Ad delete route to remove rejected ads
-    await fetch(`https://platform-backend-54nn.onrender.com/api/ads/${id}`, {
-      method: 'DELETE'
-    });
-    setAds(ads.filter(ad => ad.id !== id));
-  }}
-  onLogout={() => { setIsAdmin(false); navigate('home'); }}
-/>
+      <StaffLoginPage 
+        onLogin={() => { setIsAdmin(true); navigate('admin'); }} 
+        onBack={() => navigate('home')} 
+      />
+    );
+  }
 
   if (route.view === 'login') {
     return <StaffLoginPage onLogin={() => { setIsAdmin(true); navigate('admin'); }} onBack={() => navigate('home')} />;
