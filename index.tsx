@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { 
@@ -88,13 +87,13 @@ interface Advertisement {
 const INITIAL_ARTICLES: Article[] = [
   {
     id: 't-1',
-    title: 'The Dangote Revolution: Nigeria’s Path to Energy Independence',
+    title: 'The Dangote Revolution: Nigeria\'s Path to Energy Independence',
     category: 'Business',
     author: 'Adebayo Olushola',
     date: '10 mins ago',
     image: 'https://images.unsplash.com/photo-1541872703-74c5e443d1f5?auto=format&fit=crop&q=80&w=1000',
-    excerpt: 'As the Dangote Refinery begins full-scale operations, the landscape of Nigeria’s downstream oil sector undergoes a seismic shift.',
-    content: `Nigeria’s decades-long reliance on imported refined petroleum products is finally nearing an end as the world-class Dangote Refinery ramps up its daily production. This massive industrial complex, situated in the Lekki Free Trade Zone, represents the largest single-train refinery globally and carries the weight of a nation’s economic expectations on its shoulders.
+    excerpt: 'As the Dangote Refinery begins full-scale operations, the landscape of Nigeria\'s downstream oil sector undergoes a seismic shift.',
+    content: `Nigeria's decades-long reliance on imported refined petroleum products is finally nearing an end as the world-class Dangote Refinery ramps up its daily production. This massive industrial complex, situated in the Lekki Free Trade Zone, represents the largest single-train refinery globally and carries the weight of a nation's economic expectations on its shoulders.
 
 The immediate impact is already being felt in the logistical chains of the country. By refining locally, the massive costs associated with shipping crude oil abroad and bringing back refined petrol—including insurance, demurrage, and landing costs—are expected to be drastically reduced. This shift isn't just about fuel; it's about the foreign exchange savings that could stabilize the Naira.
 
@@ -106,7 +105,7 @@ International energy analysts are also watching closely. A self-sufficient Niger
 
 Critics, however, point to the environmental footprint of such a massive facility. As the world pushes toward a green transition, Nigeria is doubling down on fossil fuels. Proponents argue that industrialization must precede transition for developing economies, and the refinery is a necessary step toward building the capital needed for future green investments.
 
-Ultimately, the Dangote Refinery is more than just a business venture; it is a symbol of Nigerian resilience and industrial ambition. If managed correctly, it could be the foundation for a new era of prosperity, powering the nation’s growth and providing the energy security that has eluded the country since independence.`,
+Ultimately, the Dangote Refinery is more than just a business venture; it is a symbol of Nigerian resilience and industrial ambition. If managed correctly, it could be the foundation for a new era of prosperity, powering the nation's growth and providing the energy security that has eluded the country since independence.`,
     views: '150k',
     isBreaking: true
   },
@@ -122,7 +121,7 @@ Ultimately, the Dangote Refinery is more than just a business venture; it is a s
 
 However, a significant worry is emerging among international policy makers regarding the 'AI Divide.' While the West and China pour billions into compute power and talent acquisition, many nations in the Global South find themselves relegated to being data providers or mere consumers of finished models.
 
-In Nigeria and other emerging economies, the challenge is two-fold: infrastructure and data sovereignty. Without consistent power and high-speed internet, the benefits of real-time AI integration remain a distant dream for rural communities. Furthermore, many of the world’s leading models are trained on Western datasets, often overlooking the linguistic and cultural nuances of African societies.
+In Nigeria and other emerging economies, the challenge is two-fold: infrastructure and data sovereignty. Without consistent power and high-speed internet, the benefits of real-time AI integration remain a distant dream for rural communities. Furthermore, many of the world's leading models are trained on Western datasets, often overlooking the linguistic and cultural nuances of African societies.
 
 There is a growing movement to develop localized AI solutions. Experts argue that for AI to be truly beneficial, it must be 'African-centric,' trained on local dialects and tailored to solve regional challenges like agricultural optimization and decentralized finance.
 
@@ -141,9 +140,9 @@ The future of AGI will be a test of global solidarity. Will this technology be t
     date: '3 hours ago',
     image: 'https://images.unsplash.com/photo-1540910419892-f7e722a49266?auto=format&fit=crop&q=80&w=1000',
     excerpt: 'In a surprise move that has shaken the political landscape, major opposition figures have met in Abuja to discuss a unified front.',
-    content: `With the next general election still years away, the political drums are already beating a familiar rhythm of realignment. Yesterday’s high-profile meeting in Abuja between key figures from the PDP, LP, and NNPP has sent shockwaves through the ruling APC’s camp, signaling an early start to the 2027 campaign.
+    content: `With the next general election still years away, the political drums are already beating a familiar rhythm of realignment. Yesterday's high-profile meeting in Abuja between key figures from the PDP, LP, and NNPP has sent shockwaves through the ruling APC's camp, signaling an early start to the 2027 campaign.
 
-The meeting, reportedly lasting over six hours, focused on the potential for a 'Grand Opposition Alliance.' The goal is to avoid the vote-splitting that many believe led to the opposition’s collective defeat in 2023. By merging their grassroots structures, they hope to present a singular, formidable alternative to the incumbent administration.
+The meeting, reportedly lasting over six hours, focused on the potential for a 'Grand Opposition Alliance.' The goal is to avoid the vote-splitting that many believe led to the opposition's collective defeat in 2023. By merging their grassroots structures, they hope to present a singular, formidable alternative to the incumbent administration.
 
 However, the path to unity is fraught with ego and regional interests. Each party leader carries their own set of core supporters and ideologies that may not easily mesh. The question of who would head such a ticket is already the subject of intense speculation and potential friction.
 
@@ -174,22 +173,22 @@ Inland nations like Niger and Chad are particularly vulnerable. Without a sea co
 
 Technological solutions, such as drought-resistant crops and advanced irrigation systems, offer a glimpse of hope. However, the cost of implementing these at scale is prohibitive for most Sahelian governments. There is a strong call for 'Climate Justice,' demanding that industrialized nations pay for the damage caused by their historical carbon emissions.
 
-Global security experts warn that the Sahel crisis cannot be contained within Africa. The displacement of people and the rise of instability have direct implications for Mediterranean migration routes and global security. Solving the Sahel’s problems is, in essence, solving a global problem.
+Global security experts warn that the Sahel crisis cannot be contained within Africa. The displacement of people and the rise of instability have direct implications for Mediterranean migration routes and global security. Solving the Sahel's problems is, in essence, solving a global problem.
 
 The upcoming COP summit will be a crucial moment for the region. Sahelian leaders are preparing to present a unified voice, demanding concrete financial commitments and technology transfers. The world can no longer afford to look away from a crisis that is fundamentally about the right to survive on a warming planet.`,
     views: '65k'
   },
   {
     id: 't-5',
-    title: 'The Afrobeats Diplomacy: Nigeria’s Soft Power Surge',
+    title: 'The Afrobeats Diplomacy: Nigeria\'s Soft Power Surge',
     category: 'Entertainment',
     author: 'Toluwalashe Adeyemi',
     date: '6 hours ago',
     image: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&q=80&w=1000',
-    excerpt: 'From Burna Boy to Tems, Nigerian artists are doing more for the country’s image than any diplomatic mission could.',
+    excerpt: 'From Burna Boy to Tems, Nigerian artists are doing more for the country\'s image than any diplomatic mission could.',
     content: `Walk into a club in London, a cafe in Paris, or a gym in New York, and you are almost guaranteed to hear the infectious rhythms of Afrobeats. Nigeria's music industry has transformed into a global juggernaut, transcending borders and languages to become one of the most significant cultural movements of the 21st century.
 
-This isn't just about entertainment; it’s about 'Soft Power.' For decades, Nigeria’s international reputation was often overshadowed by stories of corruption and instability. Today, the world sees a different Nigeria—one that is vibrant, creative, and trend-setting. Our artists are our most effective ambassadors.
+This isn't just about entertainment; it's about 'Soft Power.' For decades, Nigeria's international reputation was often overshadowed by stories of corruption and instability. Today, the world sees a different Nigeria—one that is vibrant, creative, and trend-setting. Our artists are our most effective ambassadors.
 
 The economic impact is equally impressive. The influx of foreign investment from major record labels like Sony, Warner, and Universal has professionalized the local industry. This has created a massive ecosystem of producers, managers, stylists, and digital marketers, providing high-value jobs for thousands of young Nigerians.
 
@@ -214,13 +213,13 @@ Despite these hurdles, the momentum of Afrobeats shows no sign of slowing down. 
 
 For an import-dependent economy like Nigeria, a strong dollar is a double-edged sword. While it attracts foreign investors seeking higher yields on US bonds, it makes the cost of importing essential goods—from machinery to food items—prohibitively expensive for local businesses.
 
-This 'imported inflation' is a primary driver of the rising cost of living in Nigeria. As businesses pay more for foreign exchange, they inevitably pass those costs down to the consumer. The price of bread, fuel, and electronics are all, in some way, tied to the Fed’s interest rate trajectory.
+This 'imported inflation' is a primary driver of the rising cost of living in Nigeria. As businesses pay more for foreign exchange, they inevitably pass those costs down to the consumer. The price of bread, fuel, and electronics are all, in some way, tied to the Fed's interest rate trajectory.
 
 The Central Bank of Nigeria (CBN) is left with difficult choices. To defend the Naira, they often have to raise domestic interest rates, which can stifle local borrowing and economic growth. It is a delicate balancing act between controlling inflation and encouraging industrialization.
 
 Global market analysts suggest that the period of 'cheap money' is over. Emerging markets must now compete for a shrinking pool of global capital. This puts pressure on the Nigerian government to implement structural reforms that make the country more attractive to long-term direct investment.
 
-There is also the issue of external debt. Much of Nigeria’s national debt is denominated in dollars. As the dollar strengthens and interest rates rise, the cost of servicing that debt increases, leaving less money in the national budget for education, healthcare, and infrastructure.
+There is also the issue of external debt. Much of Nigeria's national debt is denominated in dollars. As the dollar strengthens and interest rates rise, the cost of servicing that debt increases, leaving less money in the national budget for education, healthcare, and infrastructure.
 
 The takeaway for Nigerian businesses is clear: volatility is the new normal. Diversifying revenue streams and reducing reliance on imports are no longer just good strategies—they are essential for survival. Until the global economic cycle shifts again, the Naira will remain at the mercy of decisions made thousands of miles away.`,
     views: '74k'
@@ -278,7 +277,7 @@ The long-term economic impact of a malaria-free Africa cannot be overstated. The
     author: 'Segun Amusan',
     date: '2 days ago',
     image: 'https://images.unsplash.com/photo-1474487056233-5220ea1a2117?auto=format&fit=crop&q=80&w=1000',
-    excerpt: 'The Blue and Red lines are beginning to change the face of transportation in Africa’s largest metropolis.',
+    excerpt: 'The Blue and Red lines are beginning to change the face of transportation in Africa\'s largest metropolis.',
     content: `Lagos is famous for many things, but its traffic congestion—the legendary 'go-slow'—is perhaps its most notorious feature. For millions of residents, the daily commute is an grueling battle against time, heat, and gridlock. The newly commissioned Lagos Rail Mass Transit system is finally offering a light at the end of the tunnel.
 
 The Blue Line, running from Marina to Mile 2, and the Red Line, stretching from Agbado to Oyingbo, represent the first modern metro system in West Africa. By moving thousands of people off the roads and onto the rails, the government hopes to significantly reduce travel times and carbon emissions.
@@ -291,7 +290,7 @@ However, maintenance remains the biggest concern for skeptics. Historically, lar
 
 Safety is also a priority. The integration of the 'Cowry Card'—a unified payment system for trains, buses, and ferries—is helping to streamline the boarding process and reduce the handling of cash. This digitized system also provides valuable data for future transport planning.
 
-The Lagos Rail is not just a transport project; it’s a social project. It’s about giving people back their time—time that can be spent with family, in education, or being productive. As the system expands to other parts of the city, the dream of a truly 'Smart Lagos' is slowly becoming a reality.`,
+The Lagos Rail is not just a transport project; it's a social project. It's about giving people back their time—time that can be spent with family, in education, or being productive. As the system expands to other parts of the city, the dream of a truly 'Smart Lagos' is slowly becoming a reality.`,
     views: '95k'
   },
   {
@@ -312,7 +311,7 @@ There is also a growing debate about the 'Colonization of Space.' Ethicists are 
 
 International cooperation is essential. The high cost and complexity of a Mars mission mean that no single nation can do it alone. The International Space Station (ISS) has shown that we can work together in space even when we disagree on Earth; the Mars mission will be the ultimate test of this spirit.
 
-The technology developed for Mars has direct benefits for Earth. Advancements in water recycling, high-density batteries, and remote medicine will find applications in solving our own planet’s most pressing problems. Space exploration is, in many ways, an investment in our future here at home.
+The technology developed for Mars has direct benefits for Earth. Advancements in water recycling, high-density batteries, and remote medicine will find applications in solving our own planet's most pressing problems. Space exploration is, in many ways, an investment in our future here at home.
 
 As the world watches the countdown to the 2025 window, there is a sense of collective awe. We are a species of explorers, and the Red Planet is the next horizon. Whether we succeed or fail, the attempt itself is a testament to human curiosity and our refusal to be bound by the limits of our own world.`,
     views: '167k'
@@ -380,7 +379,7 @@ const Header: React.FC<{
             </div>
             <div className="flex flex-col justify-center overflow-visible">
               <h1 className="font-sans text-base md:text-xl font-bold text-gray-900 dark:text-white tracking-tight leading-none whitespace-nowrap">
-                The People’s Platform
+                The People's Platform
               </h1>
               <p className="text-[9px] md:text-[10px] text-naija font-bold uppercase tracking-widest mt-1 hidden xs:block">Voice of the Nation</p>
             </div>
@@ -904,65 +903,152 @@ const App: React.FC = () => {
   const headerAd = ads.find(a => a.status === 'Active' && a.plan === 'Header Leaderboard');
   const sidebarAd = ads.find(a => a.status === 'Active' && a.plan === 'Sidebar Banner');
 
-  // ... inside your render function
- if (route.view === 'admin') {
-  return (
-    <AdminDashboard 
-      articles={articles} 
-      pendingArticles={pendingArticles} 
-      ads={ads}
-      onPublish={async (a) => {
-        const res = await fetch('https://platform-backend-54nn.onrender.com/api/articles', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...a, status: 'published' }) 
-        });
-        const saved = await res.json();
-        setArticles([saved, ...articles]);
-      }} 
-      onUpdate={async (a) => {
-        const res = await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${a.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(a)
-        });
-        if (res.ok) setArticles(articles.map(art => art.id === a.id ? a : art));
-      }}
-      onDelete={async (id) => {
-        if (!confirm("Delete permanently?")) return;
-        await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${id}`, { method: 'DELETE' });
-        setArticles(articles.filter(a => a.id !== id));
-      }}
-      onApproveSubmission={async (a) => { 
-        const res = await fetch(`https://platform-backend-54nn.onrender.com/api/admin/articles/${a.id}/approve`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'published' })
-        });
-        if (res.ok) {
-          const approved = await res.json();
-          setArticles([approved, ...articles]); 
-          setPendingArticles(pendingArticles.filter(p => p.id !== a.id)); 
-        }
-      }}
-      onRejectSubmission={async (id) => {
-        await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${id}`, { method: 'DELETE' });
-        setPendingArticles(pendingArticles.filter(p => p.id !== id));
-      }}
-      onApproveAd={async (id) => {
-        await fetch(`https://platform-backend-54nn.onrender.com/api/admin/ads/${id}/approve`, { method: 'PATCH' });
-        setAds(ads.map(ad => ad.id === id ? { ...ad, status: 'Active' } : ad));
-      }}
-      onRejectAd={async (id) => {
-        await fetch(`https://platform-backend-54nn.onrender.com/api/ads/${id}`, { method: 'DELETE' });
-        setAds(ads.filter(ad => ad.id !== id));
-      }}
-      onLogout={() => { setIsAdmin(false); navigate('home'); }}
-    />
-  );
-}
-    ); // <--- Ensure this semicolon and closing paren exist!
-  } // <--- Ensure this closing brace exists!
+  if (route.view === 'admin') {
+    return (
+      <AdminDashboard 
+        articles={articles} 
+        pendingArticles={pendingArticles} 
+        ads={ads}
+        onPublish={async (a: Article) => {
+          try {
+            const res = await fetch('https://platform-backend-54nn.onrender.com/api/articles', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...a, status: 'published' }) 
+            });
+            
+            if (!res.ok) throw new Error('Failed to publish article');
+            
+            const saved: Article = await res.json();
+            setArticles([saved, ...articles]);
+            alert('Article published successfully!');
+          } catch (error) {
+            console.error('Error publishing article:', error);
+            alert('Failed to publish article. Please try again.');
+          }
+        }} 
+        onUpdate={async (a: Article) => {
+          try {
+            const res = await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${a.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(a)
+            });
+            
+            if (res.ok) {
+              const updated: Article = await res.json();
+              setArticles(articles.map(art => art.id === a.id ? updated : art));
+              alert('Article updated successfully!');
+            } else {
+              throw new Error('Failed to update article');
+            }
+          } catch (error) {
+            console.error('Error updating article:', error);
+            alert('Failed to update article. Please try again.');
+          }
+        }}
+        onDelete={async (id: string) => {
+          if (!confirm("Delete article permanently? This action cannot be undone.")) return;
+          
+          try {
+            const res = await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${id}`, { 
+              method: 'DELETE' 
+            });
+            
+            if (res.ok) {
+              setArticles(articles.filter(a => a.id !== id));
+              alert('Article deleted successfully!');
+            } else {
+              throw new Error('Failed to delete article');
+            }
+          } catch (error) {
+            console.error('Error deleting article:', error);
+            alert('Failed to delete article. Please try again.');
+          }
+        }}
+        onApproveSubmission={async (a: Article) => { 
+          try {
+            const res = await fetch(`https://platform-backend-54nn.onrender.com/api/admin/articles/${a.id}/approve`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: 'published' })
+            });
+            
+            if (res.ok) {
+              const approved: Article = await res.json();
+              setArticles([approved, ...articles]); 
+              setPendingArticles(pendingArticles.filter(p => p.id !== a.id));
+              alert('Submission approved and published!');
+            } else {
+              throw new Error('Failed to approve submission');
+            }
+          } catch (error) {
+            console.error('Error approving submission:', error);
+            alert('Failed to approve submission. Please try again.');
+          }
+        }}
+        onRejectSubmission={async (id: string) => {
+          if (!confirm("Reject this submission? This action cannot be undone.")) return;
+          
+          try {
+            const res = await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${id}`, { 
+              method: 'DELETE' 
+            });
+            
+            if (res.ok) {
+              setPendingArticles(pendingArticles.filter(p => p.id !== id));
+              alert('Submission rejected successfully!');
+            } else {
+              throw new Error('Failed to reject submission');
+            }
+          } catch (error) {
+            console.error('Error rejecting submission:', error);
+            alert('Failed to reject submission. Please try again.');
+          }
+        }}
+        onApproveAd={async (id: string) => {
+          try {
+            const res = await fetch(`https://platform-backend-54nn.onrender.com/api/admin/ads/${id}/approve`, { 
+              method: 'PATCH' 
+            });
+            
+            if (res.ok) {
+              setAds(ads.map(ad => ad.id === id ? { ...ad, status: 'Active' } : ad));
+              alert('Advertisement approved successfully!');
+            } else {
+              throw new Error('Failed to approve advertisement');
+            }
+          } catch (error) {
+            console.error('Error approving ad:', error);
+            alert('Failed to approve advertisement. Please try again.');
+          }
+        }}
+        onRejectAd={async (id: string) => {
+          if (!confirm("Reject this advertisement? This action cannot be undone.")) return;
+          
+          try {
+            const res = await fetch(`https://platform-backend-54nn.onrender.com/api/ads/${id}`, { 
+              method: 'DELETE' 
+            });
+            
+            if (res.ok) {
+              setAds(ads.filter(ad => ad.id !== id));
+              alert('Advertisement rejected successfully!');
+            } else {
+              throw new Error('Failed to reject advertisement');
+            }
+          } catch (error) {
+            console.error('Error rejecting ad:', error);
+            alert('Failed to reject advertisement. Please try again.');
+          }
+        }}
+        onLogout={() => { 
+          setIsAdmin(false); 
+          navigate('home'); 
+        }}
+      />
+    );
+  }
 
   if (route.view === 'login') {
     return (
@@ -971,10 +1057,6 @@ const App: React.FC = () => {
         onBack={() => navigate('home')} 
       />
     );
-  }
-
-  if (route.view === 'login') {
-    return <StaffLoginPage onLogin={() => { setIsAdmin(true); navigate('admin'); }} onBack={() => navigate('home')} />;
   }
 
   // Categories list stays manageable
@@ -1480,7 +1562,7 @@ const Footer: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) =
         <div className="col-span-1 sm:col-span-2 md:col-span-1">
           <div className="flex items-center gap-3 mb-6 md:mb-8">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-naija rounded-full flex items-center justify-center text-white font-bold text-sm tracking-wider shadow-lg"><Globe className="w-6 h-6 md:w-7 md:h-7" /></div>
-            <h2 className="font-sans text-lg md:text-xl font-bold text-gray-900 dark:text-white">The People’s Platform</h2>
+            <h2 className="font-sans text-lg md:text-xl font-bold text-gray-900 dark:text-white">The People's Platform</h2>
           </div>
           <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed font-medium">Empowering Nigerian voices through unbiased reporting and community-driven journalism. No paywalls, just truth.</p>
         </div>
@@ -1513,7 +1595,7 @@ const Footer: React.FC<{ onNavigate: (v: string) => void }> = ({ onNavigate }) =
           </div>
         </div>
       </div>
-      <div className="text-center text-gray-400 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.3em] leading-relaxed">© 2025 The People’s Platform Media Ltd.<br className="md:hidden" /> Built for the Pulse of the Nation.</div>
+      <div className="text-center text-gray-400 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.3em] leading-relaxed">© 2025 The People's Platform Media Ltd.<br className="md:hidden" /> Built for the Pulse of the Nation.</div>
     </div>
   </footer>
 );
