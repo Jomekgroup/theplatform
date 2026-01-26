@@ -904,17 +904,29 @@ const App: React.FC = () => {
   const headerAd = ads.find(a => a.status === 'Active' && a.plan === 'Header Leaderboard');
   const sidebarAd = ads.find(a => a.status === 'Active' && a.plan === 'Sidebar Banner');
 
-  if (route.view === 'admin' && isAdmin) {
+  // ... inside your render function
+  if (route.view === 'admin') {
     return (
       <AdminDashboard 
-        articles={articles} pendingArticles={pendingArticles} ads={ads}
-        onPublish={a => setArticles([a, ...articles])} onDelete={id => setArticles(articles.filter(a => a.id !== id))}
-        onUpdate={updatedArt => setArticles(prev => prev.map(a => a.id === updatedArt.id ? updatedArt : a))}
-        onApproveSubmission={a => { setArticles([a, ...articles]); setPendingArticles(pendingArticles.filter(p => p.id !== a.id)); }}
-        onRejectSubmission={id => setPendingArticles(pendingArticles.filter(p => p.id !== id))}
-        onApproveAd={id => setAds(ads.map(ad => ad.id === id ? { ...ad, status: 'Active' } : ad))}
-        onRejectAd={id => setAds(ads.map(ad => ad.id === id ? { ...ad, status: 'Rejected' } : ad))}
+        articles={articles} 
+        pendingArticles={pendingArticles} 
+        ads={ads}
+        onPublish={async (a) => { /* ... */ }} 
+        onDelete={async (id) => { /* ... */ }}
+        onApproveSubmission={async (a) => { /* ... */ }}
+        onRejectSubmission={async (id) => { /* ... */ }}
+        onApproveAd={async (id) => { /* ... */ }}
+        onRejectAd={async (id) => { /* ... */ }}
         onLogout={() => { setIsAdmin(false); navigate('home'); }}
+      />
+    ); // <--- Ensure this semicolon and closing paren exist!
+  } // <--- Ensure this closing brace exists!
+
+  if (route.view === 'login') {
+    return (
+      <StaffLoginPage 
+        onLogin={() => { setIsAdmin(true); navigate('admin'); }} 
+        onBack={() => navigate('home')} 
       />
     );
   }
