@@ -1043,7 +1043,7 @@ const App: React.FC = () => {
         onLogout={() => { setIsAdmin(false); navigate('home'); }}
       />
     );
-  }
+  } else if (route.view === 'login') {
     return (
       <StaffLoginPage 
         onLogin={() => { setIsAdmin(true); navigate('admin'); }} 
