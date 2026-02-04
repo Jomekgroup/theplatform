@@ -1157,29 +1157,76 @@ const App: React.FC = () => {
           />
         )}
 
-        {route.view === 'submit' && <SubmitNewsPage onBack={() => navigate('home')} onSubmit={a => { 
-          setPendingArticles([a, ...pendingArticles]); 
-          alert("Your story has been submitted for editorial review. Thank you for being a part of the platform!"); 
-          navigate('home'); 
-          // Refresh articles list to show newly approved submissions
-          setTimeout(() => {
-            fetch(`${API_URL}/api/articles`)
-              .then(res => res.ok ? res.json() : [])
-              .then(data => Array.isArray(data) && data.length > 0 && setArticles(data))
-              .catch(err => console.error('Failed to refresh articles:', err));
-          }, 1000);
+        {route.view === 'submit' && <SubmitNewsPage onBack={() => navigate('home')} onSubmit={async (a) => { 
+          try {
+            const payload = {
+              title: a.title,
+              subHeadline: (a as any).subHeadline || '',
+              category: a.category,
+              author: a.author,
+              image: a.image,
+              excerpt: a.excerpt,
+              content: a.content,
+              status: 'pending'
+            };
+
+            const res = await fetch(`${API_URL}/api/articles`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+              const saved = await res.json();
+              setPendingArticles([saved, ...pendingArticles]);
+              alert('Your story has been submitted for editorial review. Thank you!');
+              navigate('home');
+              // Refresh articles list
+              setTimeout(() => {
+                fetch(`${API_URL}/api/articles`).then(r => r.ok ? r.json() : []).then(data => Array.isArray(data) && data.length > 0 && setArticles(data)).catch(err => console.error(err));
+              }, 1000);
+            } else {
+              const err = await res.json().catch(() => ({}));
+              alert('Submission failed: ' + (err.message || res.statusText));
+            }
+          } catch (err) { console.error(err); alert('Submission failed'); }
         }} />}
-        {route.view === 'advertise' && <AdvertisePage onBack={() => navigate('home')} onSubmitAd={a => { 
-          setAds([a, ...ads]); 
-          // Refresh ads list from backend
-          setTimeout(() => {
-            fetch(`${API_URL}/api/ads/active`)
-              .then(res => res.ok ? res.json() : [])
-              .then(data => Array.isArray(data) && setAds(data))
-              .catch(err => console.error('Failed to refresh ads:', err));
-          }, 1000);
-        }} />}
-      </main>
+
+        {route.view === 'advertise' && <AdvertisePage onBack={() => navigate('home')} onSubmitAd={async (a) => { 
+          try {
+            const payload = {
+              clientName: a.clientName,
+              email: a.email,
+              plan: a.plan,
+              amount: a.amount,
+              receiptImage: a.receiptImage,
+              adImage: a.adImage,
+              adContent: a.adContent,
+              adUrl: (a as any).adUrl || '',
+              adHeadline: a.adHeadline,
+              adContentFile: (a as any).adContentFile || ''
+            };
+
+            const res = await fetch(`${API_URL}/api/ads`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+              const saved = await res.json();
+              setAds([saved, ...ads]);
+              alert('Ad submitted! Our team will verify the payment shortly.');
+              navigate('home');
+              setTimeout(() => {
+                fetch(`${API_URL}/api/ads/active`).then(r => r.ok ? r.json() : []).then(data => Array.isArray(data) && setAds(data)).catch(err => console.error(err));
+              }, 1000);
+            } else {
+              const err = await res.json().catch(() => ({}));
+              alert('Ad submission failed: ' + (err.message || res.statusText));
+            }
+          } catch (err) { console.error(err); alert('Ad submission failed'); }
+        }} />
 
       <Footer onNavigate={navigate} />
     </div>
