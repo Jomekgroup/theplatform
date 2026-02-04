@@ -1226,7 +1226,9 @@ const App: React.FC = () => {
               alert('Ad submission failed: ' + (err.message || res.statusText));
             }
           } catch (err) { console.error(err); alert('Ad submission failed'); }
-        }} />
+        }} />}
+
+        </main>
 
       <Footer onNavigate={navigate} />
     </div>
