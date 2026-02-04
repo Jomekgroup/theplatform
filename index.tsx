@@ -10,6 +10,9 @@ import {
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
+// API Base URL Configuration
+const API_URL = import.meta.env.VITE_API_URL || 'https://platform-backend-54nn.onrender.com';
+
 // --- Custom Social Icons for Exact Branding ---
 
 const SocialIcons = {
@@ -850,6 +853,40 @@ const App: React.FC = () => {
   const [isDark, setIsDark] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
 
+  // Fetch articles from backend on component mount
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/articles`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setArticles(data);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch articles:', error);
+      }
+    };
+
+    const fetchAds = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/ads/active`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            setAds(data);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch ads:', error);
+      }
+    };
+
+    fetchArticles();
+    fetchAds();
+  }, []);
+
   // Sync state with URL Hash for back/forward support
   useEffect(() => {
     const handleHashChange = () => {
@@ -912,7 +949,7 @@ const App: React.FC = () => {
         ads={ads}
         onPublish={async (a) => {
           try {
-            const res = await fetch('https://platform-backend-54nn.onrender.com/api/articles', {
+            const res = await fetch(`${API_URL}/api/articles`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ ...a, status: 'published' })
@@ -921,12 +958,19 @@ const App: React.FC = () => {
               const saved = await res.json();
               setArticles(prev => [saved, ...prev]);
               alert("Published!");
+              // Refresh articles list
+              setTimeout(() => {
+                fetch(`${API_URL}/api/articles`)
+                  .then(r => r.ok ? r.json() : [])
+                  .then(data => Array.isArray(data) && data.length > 0 && setArticles(data))
+                  .catch(err => console.error(err));
+              }, 500);
             }
           } catch (e) { console.error(e); }
         }}
         onUpdate={async (a) => {
           try {
-            const res = await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${a.id}`, {
+            const res = await fetch(`${API_URL}/api/articles/${a.id}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(a)
@@ -939,12 +983,12 @@ const App: React.FC = () => {
         }}
         onDelete={async (id) => {
           if (!confirm("Delete permanently?")) return;
-          await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${id}`, { method: 'DELETE' });
+          await fetch(`${API_URL}/api/articles/${id}`, { method: 'DELETE' });
           setArticles(prev => prev.filter(a => a.id !== id));
         }}
         onApproveSubmission={async (a) => {
           try {
-            const res = await fetch(`https://platform-backend-54nn.onrender.com/api/admin/articles/${a.id}/approve`, {
+            const res = await fetch(`${API_URL}/api/admin/articles/${a.id}/approve`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' }
             });
@@ -953,34 +997,53 @@ const App: React.FC = () => {
               setArticles(prev => [approved, ...prev]);
               setPendingArticles(prev => prev.filter(p => p.id !== a.id));
               alert("Submission Approved!");
+              // Refresh articles from backend
+              setTimeout(() => {
+                fetch(`${API_URL}/api/articles`)
+                  .then(r => r.ok ? r.json() : [])
+                  .then(data => Array.isArray(data) && data.length > 0 && setArticles(data))
+                  .catch(err => console.error(err));
+              }, 500);
             }
           } catch (e) { console.error(e); }
         }}
         onRejectSubmission={async (id) => {
           if (!confirm("Reject this story?")) return;
-          await fetch(`https://platform-backend-54nn.onrender.com/api/articles/${id}`, { method: 'DELETE' });
+          await fetch(`${API_URL}/api/articles/${id}`, { method: 'DELETE' });
           setPendingArticles(prev => prev.filter(p => p.id !== id));
         }}
         onApproveAd={async (id) => {
           try {
-            const res = await fetch(`https://platform-backend-54nn.onrender.com/api/admin/ads/${id}/approve`, { method: 'PATCH' });
+            const res = await fetch(`${API_URL}/api/admin/ads/${id}/approve`, { method: 'PATCH' });
             if (res.ok) {
               setAds(prev => prev.map(ad => ad.id === id ? { ...ad, status: 'Active' } : ad));
               alert("Ad Verified & Live!");
+              // Refresh ads from backend
+              setTimeout(() => {
+                fetch(`${API_URL}/api/ads/active`)
+                  .then(r => r.ok ? r.json() : [])
+                  .then(data => Array.isArray(data) && setAds(data))
+                  .catch(err => console.error(err));
+              }, 500);
             }
           } catch (e) { console.error(e); }
         }}
         onRejectAd={async (id) => {
           if (!confirm("Decline this advertisement?")) return;
-          await fetch(`https://platform-backend-54nn.onrender.com/api/ads/${id}`, { method: 'DELETE' });
+          await fetch(`${API_URL}/api/ads/${id}`, { method: 'DELETE' });
           setAds(prev => prev.filter(ad => ad.id !== id));
+          // Refresh ads from backend
+          setTimeout(() => {
+            fetch(`${API_URL}/api/ads/active`)
+              .then(r => r.ok ? r.json() : [])
+              .then(data => Array.isArray(data) && setAds(data))
+              .catch(err => console.error(err));
+          }, 500);
         }}
         onLogout={() => { setIsAdmin(false); navigate('home'); }}
       />
     );
   }
-
-  if (route.view === 'login') {
     return (
       <StaffLoginPage 
         onLogin={() => { setIsAdmin(true); navigate('admin'); }} 
@@ -1094,8 +1157,28 @@ const App: React.FC = () => {
           />
         )}
 
-        {route.view === 'submit' && <SubmitNewsPage onBack={() => navigate('home')} onSubmit={a => { setPendingArticles([a, ...pendingArticles]); alert("Your story has been submitted for editorial review. Thank you for being a part of the platform!"); navigate('home'); }} />}
-        {route.view === 'advertise' && <AdvertisePage onBack={() => navigate('home')} onSubmitAd={a => setAds([a, ...ads])} />}
+        {route.view === 'submit' && <SubmitNewsPage onBack={() => navigate('home')} onSubmit={a => { 
+          setPendingArticles([a, ...pendingArticles]); 
+          alert("Your story has been submitted for editorial review. Thank you for being a part of the platform!"); 
+          navigate('home'); 
+          // Refresh articles list to show newly approved submissions
+          setTimeout(() => {
+            fetch(`${API_URL}/api/articles`)
+              .then(res => res.ok ? res.json() : [])
+              .then(data => Array.isArray(data) && data.length > 0 && setArticles(data))
+              .catch(err => console.error('Failed to refresh articles:', err));
+          }, 1000);
+        }} />}
+        {route.view === 'advertise' && <AdvertisePage onBack={() => navigate('home')} onSubmitAd={a => { 
+          setAds([a, ...ads]); 
+          // Refresh ads list from backend
+          setTimeout(() => {
+            fetch(`${API_URL}/api/ads/active`)
+              .then(res => res.ok ? res.json() : [])
+              .then(data => Array.isArray(data) && setAds(data))
+              .catch(err => console.error('Failed to refresh ads:', err));
+          }, 1000);
+        }} />}
       </main>
 
       <Footer onNavigate={navigate} />
@@ -1273,7 +1356,6 @@ const AdminComposeForm: React.FC<{
   const [category, setCategory] = useState(initialData?.category || 'Metro');
   const [content, setContent] = useState(initialData?.content || '');
   const [image, setImage] = useState(initialData?.image || '');
-  const [isBreaking, setIsBreaking] = useState(initialData?.isBreaking || false);
   const categories = ['Government', 'International', 'Education', 'Metro', 'Lifestyle', 'Politics', 'Business', 'Technology', 'Sports', 'Entertainment', 'Editorials'];
 
   const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1285,30 +1367,23 @@ const AdminComposeForm: React.FC<{
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !content) return alert("Please fill all required fields");
-    
-    const article: Article = {
+    if (!title || !content || !image) return alert("Please fill all required fields");
+    onSave({
       id: initialData?.id || Date.now().toString(),
       title,
       category,
       author: initialData?.author || 'Editorial Desk',
       date: initialData?.date || 'Just now',
-      image: image || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=1000',
+      image,
       excerpt: content.substring(0, 150) + '...',
       content,
       views: initialData?.views || '0',
-      isBreaking: isBreaking
-    };
-    
-    onSave(article);
-    
-    // Reset form if it's a new article
+      isBreaking: initialData?.isBreaking
+    });
     if (!initialData) {
       setTitle('');
       setContent('');
       setImage('');
-      setIsBreaking(false);
-      setCategory('Metro');
     }
   };
 
@@ -1343,23 +1418,12 @@ const AdminComposeForm: React.FC<{
             {image && <img src={image} className="mt-4 h-24 rounded-lg shadow-sm object-cover" />}
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="checkbox" 
-              checked={isBreaking} 
-              onChange={e => setIsBreaking(e.target.checked)} 
-              className="w-5 h-5 text-naija rounded focus:ring-naija"
-            />
-            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Breaking News</span>
-          </label>
-        </div>
         <div>
           <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Article Body</label>
           <textarea required value={content} onChange={e => setContent(e.target.value)} className="w-full p-6 border rounded-xl dark:bg-gray-900 dark:border-gray-700 dark:text-white h-96 font-serif leading-loose outline-none focus:ring-2 focus:ring-naija" placeholder="Tell the story..." />
         </div>
         <div className="flex gap-4">
-          <button type="submit" className="flex-1 bg-naija text-white py-5 rounded-2xl font-bold uppercase tracking-widest shadow-xl shadow-green-500/20 active:scale-95 transition-all hover:bg-green-700">
+          <button type="submit" className="flex-1 bg-naija text-white py-5 rounded-2xl font-bold uppercase tracking-widest shadow-xl shadow-green-500/20 active:scale-95 transition-all">
             {initialData ? 'Save Changes' : 'Publish to Live Feed'}
           </button>
           {onCancel && (
@@ -1392,6 +1456,7 @@ const AdminDashboard: React.FC<{
   const handleEditSave = (updated: Article) => {
     onUpdate(updated);
     setEditingArticle(null);
+    alert("Article updated successfully!");
   };
 
   return (
@@ -1449,8 +1514,8 @@ const AdminDashboard: React.FC<{
                     <h3 className="font-serif font-bold text-xl md:text-2xl dark:text-white mb-4">{a.title}</h3>
                     <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm mb-6 md:mb-8 leading-relaxed italic line-clamp-3">{a.excerpt}</p>
                     <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                       <button onClick={() => onApproveSubmission(a)} className="bg-naija text-white px-6 md:px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-green-500/20 hover:bg-green-700 transition-all">Approve Story</button>
-                       <button onClick={() => onRejectSubmission(a.id)} className="bg-red-500 text-white px-6 md:px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-red-500/20 hover:bg-red-700 transition-all">Reject Submission</button>
+                       <button onClick={() => onApproveSubmission(a)} className="bg-naija text-white px-6 md:px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-green-500/20">Approve Story</button>
+                       <button onClick={() => onRejectSubmission(a.id)} className="bg-red-500 text-white px-6 md:px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-red-500/20">Reject Submission</button>
                     </div>
                   </div>
                 ))}
@@ -1479,8 +1544,8 @@ const AdminDashboard: React.FC<{
                         </div>
                      </div>
                      <div className="flex flex-col sm:flex-row gap-4 pt-6 md:pt-8 border-t dark:border-gray-700">
-                        <button onClick={() => onApproveAd(ad.id)} className="flex-1 bg-naija text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg hover:bg-green-700 transition-all">Verify & Activate</button>
-                        <button onClick={() => onRejectAd(ad.id)} className="flex-1 bg-red-500 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg hover:bg-red-700 transition-all">Decline Ad</button>
+                        <button onClick={() => onApproveAd(ad.id)} className="flex-1 bg-naija text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg">Verify & Activate</button>
+                        <button onClick={() => onRejectAd(ad.id)} className="flex-1 bg-red-500 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg">Decline Ad</button>
                      </div>
                    </div>
                 ))}
