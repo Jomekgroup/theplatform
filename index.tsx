@@ -23,6 +23,7 @@ interface Comment {
 
 interface Article {
   id: string;
+  _id?: string;
   title: string;
   category: string;
   author: string;
@@ -31,17 +32,19 @@ interface Article {
   excerpt: string;
   content: string;
   views: string;
+  status?: string;
   isBreaking?: boolean;
   isSponsored?: boolean;
 }
 
 interface Advertisement {
   id: string;
+  _id?: string;
   clientName: string;
   email: string;
   plan: 'Sidebar Banner' | 'Sponsored Article' | 'Header Leaderboard';
   amount: number;
-  status: 'Pending' | 'Active' | 'Rejected';
+  status?: string;
   dateSubmitted: string;
   receiptImage: string; // Base64
   adImage?: string; // Base64 for the actual ad
@@ -51,6 +54,7 @@ interface Advertisement {
 }
 
 // --- API ---
+// @ts-ignore
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // --- Mock Data (Removed) ---
@@ -879,6 +883,7 @@ const AdminDashboard: React.FC<{
   articles: Article[];
   pendingArticles: Article[];
   ads: Advertisement[];
+  pendingAds: Advertisement[];
   onPublish: (article: Article) => void;
   onDelete: (id: string) => void;
   onApproveSubmission: (article: Article) => void;
@@ -886,7 +891,7 @@ const AdminDashboard: React.FC<{
   onApproveAd: (id: string) => void;
   onRejectAd: (id: string) => void;
   onLogout: () => void;
-}> = ({ articles, pendingArticles, ads, onPublish, onDelete, onApproveSubmission, onRejectSubmission, onApproveAd, onRejectAd, onLogout }) => {
+}> = ({ articles, pendingArticles, ads, pendingAds, onPublish, onDelete, onApproveSubmission, onRejectSubmission, onApproveAd, onRejectAd, onLogout }) => {
   const [activeTab, setActiveTab] = useState<'live' | 'pending' | 'compose' | 'ads'>('live');
 
   // Compose State
@@ -958,7 +963,7 @@ const AdminDashboard: React.FC<{
             onClick={() => setActiveTab('ads')}
             className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap ${activeTab === 'ads' ? 'bg-gray-900 text-white' : 'bg-white text-gray-600'}`}
           >
-            Ad Requests ({ads.filter(a => a.status === 'pending').length})
+            Ad Requests ({pendingAds.length})
           </button>
           <button
             onClick={() => setActiveTab('compose')}
@@ -1009,8 +1014,8 @@ const AdminDashboard: React.FC<{
 
         {activeTab === 'ads' && (
           <div className="grid gap-4">
-            {ads.filter(ad => ad.status === 'pending').length === 0 ? <p className="text-gray-500">No pending ad requests.</p> :
-              ads.filter(ad => ad.status === 'pending').map(ad => (
+            {pendingAds.length === 0 ? <p className="text-gray-500">No pending ad requests.</p> :
+              pendingAds.map(ad => (
                 <div key={ad.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border-l-4 border-yellow-500">
                   <div className="flex justify-between mb-4">
                     <div>
@@ -1194,6 +1199,7 @@ const App: React.FC = () => {
   const [pendingArticles, setPendingArticles] = useState<Article[]>([]);
   const [comments, setComments] = useState<Record<string, Comment[]>>(INITIAL_COMMENTS);
   const [ads, setAds] = useState<Advertisement[]>([]);
+  const [pendingAds, setPendingAds] = useState<Advertisement[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -1228,6 +1234,14 @@ const App: React.FC = () => {
       const data = await res.json();
       setPendingArticles(data);
     } catch (err) { console.error('Error fetching pending articles', err); }
+  };
+
+  const fetchPendingAds = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/pending-ads`);
+      const data = await res.json();
+      setPendingAds(data);
+    } catch (err) { console.error('Error fetching pending ads', err); }
   };
 
   const fetchComments = async (articleId: string) => {
@@ -1297,6 +1311,7 @@ const App: React.FC = () => {
   const handleAdminLogin = () => {
     setIsAdmin(true);
     fetchPendingArticles();
+    fetchPendingAds();
     setView('admin');
   };
 
@@ -1337,12 +1352,14 @@ const App: React.FC = () => {
         method: 'PATCH'
       });
       fetchAds();
+      fetchPendingAds();
     } catch (err) { alert('Failed to approve ad'); }
   };
 
   const handleRejectAd = async (id: string) => {
     // Current backend doesn't have a delete/reject route for ads.
     fetchAds();
+    fetchPendingAds();
   };
 
   const handleDeleteArticle = async (id: string) => {
@@ -1379,6 +1396,7 @@ const App: React.FC = () => {
         articles={articles}
         pendingArticles={pendingArticles}
         ads={ads}
+        pendingAds={pendingAds}
         onPublish={handlePublish}
         onDelete={handleDeleteArticle}
         onApproveSubmission={handleApproveSubmission}
