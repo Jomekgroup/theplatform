@@ -958,7 +958,7 @@ const AdminDashboard: React.FC<{
             onClick={() => setActiveTab('ads')}
             className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap ${activeTab === 'ads' ? 'bg-gray-900 text-white' : 'bg-white text-gray-600'}`}
           >
-            Ad Requests ({ads.filter(a => a.status === 'Pending').length})
+            Ad Requests ({ads.filter(a => a.status === 'pending').length})
           </button>
           <button
             onClick={() => setActiveTab('compose')}
@@ -1009,8 +1009,8 @@ const AdminDashboard: React.FC<{
 
         {activeTab === 'ads' && (
           <div className="grid gap-4">
-            {ads.filter(ad => ad.status === 'Pending').length === 0 ? <p className="text-gray-500">No pending ad requests.</p> :
-              ads.filter(ad => ad.status === 'Pending').map(ad => (
+            {ads.filter(ad => ad.status === 'pending').length === 0 ? <p className="text-gray-500">No pending ad requests.</p> :
+              ads.filter(ad => ad.status === 'pending').map(ad => (
                 <div key={ad.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border-l-4 border-yellow-500">
                   <div className="flex justify-between mb-4">
                     <div>
@@ -1314,7 +1314,7 @@ const App: React.FC = () => {
 
   const handleApproveSubmission = async (article: Article) => {
     try {
-      await fetch(`${API_BASE_URL}/admin/articles/${article.id}/approve`, {
+      await fetch(`${API_BASE_URL}/admin/articles/${article._id || article.id}/approve`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isBreaking: article.isBreaking })
@@ -1346,8 +1346,8 @@ const App: React.FC = () => {
   };
 
   const handleDeleteArticle = async (id: string) => {
-    // Adding a placeholder for delete if needed later.
-    setArticles(articles.filter(a => a.id !== id));
+    // Current backend doesn't have a delete/reject route for articles.
+    fetchArticles();
   };
 
   // Filter logic
@@ -1356,7 +1356,7 @@ const App: React.FC = () => {
     : articles.filter(a => a.category === selectedCategory);
 
   // Get active ads
-  const activeAds = ads.filter(a => a.status === 'Active');
+  const activeAds = ads.filter(a => a.status === 'active');
   const headerAd = activeAds.find(a => a.plan === 'Header Leaderboard');
   const sidebarAd = activeAds.find(a => a.plan === 'Sidebar Banner');
   const sponsoredAds = activeAds.filter(a => a.plan === 'Sponsored Article');
